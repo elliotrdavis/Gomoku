@@ -5,4 +5,4 @@ class GomokuAgent:
         self.X_IN_A_LINE = X_IN_A_LINE
 
     def move(self, board):
-        return (0,0)
+        return (0, 0)
