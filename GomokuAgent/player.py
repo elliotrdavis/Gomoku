@@ -1,4 +1,5 @@
 import numpy as np
+import copy
 
 from misc import legalMove, winningTest
 from gomokuAgent import GomokuAgent
@@ -9,8 +10,8 @@ class Player(GomokuAgent):
             for y in range(self.BOARD_SIZE):
                 moveLoc = (x, y)
                 if legalMove(board, moveLoc):
-                    copyBoard = board
-                    copyBoard[x, y] = self.ID
+                    copyBoard = copy.deepcopy(board)
+                    copyBoard[moveLoc] = self.ID
                     if winningTest(self.ID, copyBoard, self.X_IN_A_LINE):
                         return moveLoc
 
