@@ -1,6 +1,6 @@
 import numpy as np
 
-from misc import legalMove
+from misc import legalMove, rowTest, diagTest, winningTest
 from gomokuAgent import GomokuAgent
 
 class Player(GomokuAgent):
