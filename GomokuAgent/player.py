@@ -28,6 +28,14 @@ class Player(GomokuAgent):
                     ''' - If the other player has a winning move block that move, we do x in a line -2 first to
                     check if they have a checkmate type move (Imagine that a player needs to get 5 in a row if
                     they have 3 in a row with both sides open they can place on one either side to get the win)'''
+                    copyBoard[moveLoc] = self.ID * -1
+
+                    if winningTest(self.ID, copyBoard, self.X_IN_A_LINE):
+                        return moveLoc
+
+                    if winningTest(self.ID, copyBoard, self.X_IN_A_LINE - 1):
+                        return moveLoc
+
                     if winningTest(self.ID, copyBoard, self.X_IN_A_LINE - 2):
                         return moveLoc
 
