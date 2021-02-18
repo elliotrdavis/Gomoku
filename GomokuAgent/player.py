@@ -37,15 +37,15 @@ class Player(GomokuAgent):
 
 
 
-                    if winningTest(self.ID, copyBoard, self.X_IN_A_LINE):
+                    if winningTest(self.ID * -1, copyBoard, self.X_IN_A_LINE):
                         rankedMove = 4
                         move = (x, y)
 
-                    if winningTest(self.ID, copyBoard, self.X_IN_A_LINE - 1) and rankedMove < 2:
+                    if winningTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and rankedMove < 2:
                         rankedMove = 2
                         move = (x, y)
 
-                    if winningTest(self.ID, copyBoard, self.X_IN_A_LINE - 2) and rankedMove < 1:
+                    if winningTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 2) and rankedMove < 1:
                         rankedMove = 1
                         move = (x, y)
 
