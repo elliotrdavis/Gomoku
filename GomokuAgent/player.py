@@ -14,11 +14,9 @@ def endTestDiag(playerID, board, X_IN_A_LINE):
 
             emptyEnds = 0
             if legalMove(board, (r - 1, c - 1)):
-                if board[r - 1, c - 1] == 0:
-                    emptyEnds += 1
+                emptyEnds += 1
             if legalMove(board, (r + X_IN_A_LINE, c + X_IN_A_LINE)):
-                if board[r + X_IN_A_LINE, c + X_IN_A_LINE] == 0:
-                    emptyEnds += 1
+                emptyEnds += 1
 
             flag = True
             for i in range(X_IN_A_LINE):
@@ -27,7 +25,7 @@ def endTestDiag(playerID, board, X_IN_A_LINE):
                     break
             if flag:
                 return emptyEnds
-    return -1
+    return 0
 
 
 #   @return:
@@ -40,11 +38,9 @@ def endTestRow(playerID, board, X_IN_A_LINE):
 
             emptyEnds = 0
             if legalMove(board, (r, c - 1)):
-                if board[r, c - 1] == 0:
-                    emptyEnds += 1
+                emptyEnds += 1
             if legalMove(board, (r, c + X_IN_A_LINE)):
-                if board[r, c + X_IN_A_LINE] == 0:
-                    emptyEnds += 1
+                emptyEnds += 1
 
             flag = True
             for i in range(X_IN_A_LINE):
@@ -53,7 +49,7 @@ def endTestRow(playerID, board, X_IN_A_LINE):
                     break
             if flag:
                 return emptyEnds
-    return -1
+    return 0
 
 
 class Player(GomokuAgent):
@@ -93,11 +89,11 @@ class Player(GomokuAgent):
                     are two empty spaces '''
                     if diagTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and \
                             endTestDiag(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) > 1:
-                        rewards[(moveLoc)] = rewards[(moveLoc)] + 2
+                        rewards[(moveLoc)] = rewards[(moveLoc)] + 5
 
                     if rowTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and \
                             endTestRow(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) > 1:
-                        rewards[(moveLoc)] = rewards[(moveLoc)] + 2
+                        rewards[(moveLoc)] = rewards[(moveLoc)] + 5
 
         # Takes the best action that the AI found
         if np.sum(rewards) > 0:
