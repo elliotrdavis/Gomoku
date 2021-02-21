@@ -58,8 +58,8 @@ def endTestRow(playerID, board, X_IN_A_LINE):
 
 class Player(GomokuAgent):
     def move(self, board):
-        rankedMove = 0
-        move = (0, 0)
+        # - Initalize the reward board, used to determine best move
+        rewards = np.zeros((self.BOARD_SIZE, self.BOARD_SIZE))
 
         # - For every location in the board (x coordinate and y coordinate)
         for x in range(self.BOARD_SIZE):
@@ -87,24 +87,29 @@ class Player(GomokuAgent):
 
                     # - If the enemy has a winning move prioritise blocking that winning move
                     if winningTest(self.ID * -1, copyBoard, self.X_IN_A_LINE):
-                        rankedMove = 2
-                        move = (x, y)
+                        rewards[(moveLoc)] = rewards[(moveLoc)] + 100
 
                     ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
                     are two empty spaces '''
-                    if diagTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and rankedMove < 1 and \
+                    if diagTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and \
                             endTestDiag(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) > 1:
-                        rankedMove = 1
-                        move = (x, y)
+                        rewards[(moveLoc)] = rewards[(moveLoc)] + 2
 
-                    if rowTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and rankedMove < 1 and \
+                    if rowTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and \
                             endTestRow(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) > 1:
-                        rankedMove = 1
-                        move = (x, y)
+                        rewards[(moveLoc)] = rewards[(moveLoc)] + 2
 
         # Takes the best action that the AI found
-        if rankedMove > 0:
-            return move
+        if np.sum(rewards) > 0:
+            bestReward = 0
+            bestMove = (0, 0)
+            for i in range(self.BOARD_SIZE):
+                for j in range(self.BOARD_SIZE):
+                    if rewards[(i, j)] > bestReward:
+                        bestMove = (i, j)
+                        bestReward = rewards[(i, j)]
+
+            return bestMove
 
         ''' - If no optimal move just take a random move '''
         while True:
