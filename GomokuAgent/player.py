@@ -34,12 +34,14 @@ def centeroid(playerId, board):
     # = Goes through the board getting all points
     for x in range(BOARD_SIZE):
         for y in range(BOARD_SIZE):
-            if board(x, y) == playerId:
+            if board[(x, y)] == playerId:
                 totalX = totalX + x
                 totalY = totalY + y
                 totalPoints = totalPoints + 1
 
-    # - Returns mean x value and y value
+    # - Returns mean x value and y value, if 0 points just returns center
+    if totalPoints == 0:
+        return BOARD_SIZE / 2, BOARD_SIZE / 2
     return (totalX / totalPoints), (totalY / totalPoints)
 
 
@@ -92,18 +94,21 @@ def endTestRow(playerID, board, X_IN_A_LINE):
 
 class Player(GomokuAgent):
     def move(self, board):
-        # - Initalize the reward board, used to determine best move
+        """ Initalize the reward board, used to determine best move, the maximum distance between points and the center
+        of player points """
         rewards = np.zeros((self.BOARD_SIZE, self.BOARD_SIZE))
+        maxDistance = distance((0, 0), (self.BOARD_SIZE, self.BOARD_SIZE))
+        center = centeroid(self.ID, board)
 
         # - For every location in the board (x coordinate and y coordinate)
         for x in range(self.BOARD_SIZE):
             for y in range(self.BOARD_SIZE):
-
                 # - Generates a tuple of the possible move
                 moveLoc = (x, y)
 
                 # - Checks if the move is legal on the current board
                 if legalMove(board, moveLoc):
+                    rewards[moveLoc] = maxDistance - distance(moveLoc, center)
 
                     ''' Copies the board and sets the copy board move location to the player's id
                     (Marks the player's move as the current location on the copy board) '''
