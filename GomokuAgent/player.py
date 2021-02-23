@@ -4,6 +4,14 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
+MAX = 1000000000000000
+FOUR = 100000
+BLOCK_FOUR = 10000
+THREE = 5000
+BLOCK_THREE = 1670
+TWO = 1500
+BLOCK_TWO = 300
+MIN = 0
 
 #   @return:
 #   int giving the distance between two points
@@ -109,6 +117,7 @@ class Player(GomokuAgent):
                 # - Checks if the move is legal on the current board
                 if legalMove(board, moveLoc):
                     rewards[moveLoc] = maxDistance - distance(moveLoc, center)
+
 
                     ''' Copies the board and sets the copy board move location to the player's id
                     (Marks the player's move as the current location on the copy board) '''
