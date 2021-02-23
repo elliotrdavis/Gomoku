@@ -13,6 +13,7 @@ TWO = 1500
 BLOCK_TWO = 300
 MIN = 0
 
+
 #   @return:
 #   int giving the distance between two points
 def distance(point1, point2):
@@ -30,7 +31,7 @@ def distance(point1, point2):
 
 #   @return:
 #   int given the centeroid of a player's points
-def centeroid(playerId, board):
+def centroid(playerId, board):
     """ - Requires use of the total x coordinates, y coordinate, and the amount of points to calculate a mean value for
     the centeroid x and y """
     totalX = 0
@@ -106,18 +107,19 @@ class Player(GomokuAgent):
         of player points """
         rewards = np.zeros((self.BOARD_SIZE, self.BOARD_SIZE))
         maxDistance = distance((0, 0), (self.BOARD_SIZE, self.BOARD_SIZE))
-        center = centeroid(self.ID, board)
+        center = centroid(self.ID, board)
 
         # - For every location in the board (x coordinate and y coordinate)
         for x in range(self.BOARD_SIZE):
             for y in range(self.BOARD_SIZE):
-                # - Generates a tuple of the possible move
+                # - Generates a tuple of the move to be evaluated
                 moveLoc = (x, y)
 
                 # - Checks if the move is legal on the current board
                 if legalMove(board, moveLoc):
                     rewards[moveLoc] = maxDistance - distance(moveLoc, center)
 
+                    # Evaluate the move
 
                     ''' Copies the board and sets the copy board move location to the player's id
                     (Marks the player's move as the current location on the copy board) '''
