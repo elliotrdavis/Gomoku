@@ -222,11 +222,11 @@ def minimax(ID, board, X_IN_A_LINE, depth):
             # - Generates a tuple of the possible move
             moveLoc = (x, y)
 
-            copyBoard = copy.deepcopy(board)
-            copyBoard[moveLoc] = ID
-
             # - Checks if the move is legal on the current board
             if legalMove(board, moveLoc):
+                copyBoard = copy.deepcopy(board)
+                copyBoard[moveLoc] = ID
+
                 eval, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, depth - 1)
                 if eval > maxEval:
                     maxEval = eval
@@ -237,5 +237,4 @@ def minimax(ID, board, X_IN_A_LINE, depth):
 class Player(GomokuAgent):
     def move(self, board):
         score, move = minimax(self.ID, board, self.X_IN_A_LINE, 1)
-        print(move)
         return move
