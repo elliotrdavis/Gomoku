@@ -13,7 +13,6 @@ import os
 
 import concurrent.futures
 
-import time
 from random import randint
 
 from misc import winningTest, legalMove
@@ -70,7 +69,6 @@ def turn(board, player, turn_id):
     return 0, board
 
 def main():
-    start_time = time.time()
     if len(sys.argv) < 3:
         print("Error. To use: python gomoku.py PLAYER1 PLAYER2");
         print("Example: python gomoku.py GomokuAgentRand GomokuAgentRand");
@@ -103,7 +101,6 @@ def main():
         """
         for player, turn_id in [(player1, 1), (player2, -1)]:
             id, board = turn(board, player, turn_id)
-            print("--- %s seconds ---" % (time.time()-start_time))
             print(board)
             """
             CHANGE:

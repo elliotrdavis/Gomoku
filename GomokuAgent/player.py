@@ -137,17 +137,70 @@ class Player(GomokuAgent):
 
                     # - If the enemy has a winning move prioritise blocking that winning move
                     if winningTest(self.ID * -1, copyBoard, self.X_IN_A_LINE):
-                        rewards[(moveLoc)] = rewards[(moveLoc)] + 100
+                        rewards[moveLoc] = rewards[moveLoc] + MAX
+
+                    # - If the player can get 4 in a row with 2 empty spaces
+                    copyBoard[moveLoc] = self.ID
+                    if diagTest(self.ID, copyBoard, self.X_IN_A_LINE - 1) and \
+                            endTestDiag(self.ID, copyBoard, self.X_IN_A_LINE - 1) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + FOUR
+
+                    if rowTest(self.ID, copyBoard, self.X_IN_A_LINE - 1) and \
+                            endTestRow(self.ID, copyBoard, self.X_IN_A_LINE - 1) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + FOUR
 
                     ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
                     are two empty spaces '''
+                    copyBoard[moveLoc] = self.ID * -1
                     if diagTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and \
                             endTestDiag(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) > 1:
-                        rewards[(moveLoc)] = rewards[(moveLoc)] + 5
+                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FOUR
 
                     if rowTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) and \
                             endTestRow(self.ID * -1, copyBoard, self.X_IN_A_LINE - 1) > 1:
-                        rewards[(moveLoc)] = rewards[(moveLoc)] + 5
+                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FOUR
+
+                    # - If the player can get 3 in a row with 2 empty spaces
+                    copyBoard[moveLoc] = self.ID
+                    if diagTest(self.ID, copyBoard, self.X_IN_A_LINE - 2) and \
+                            endTestDiag(self.ID, copyBoard, self.X_IN_A_LINE - 2) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + THREE
+
+                    if rowTest(self.ID, copyBoard, self.X_IN_A_LINE - 2) and \
+                            endTestRow(self.ID, copyBoard, self.X_IN_A_LINE - 2) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + THREE
+
+                    ''' If the enemy can get 2 in a row/diagonal angle we want to block them from getting 3 if there
+                        are two empty spaces '''
+                    copyBoard[moveLoc] = self.ID * -1
+                    if diagTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 2) and \
+                            endTestDiag(self.ID * -1, copyBoard, self.X_IN_A_LINE - 2) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FOUR
+
+                    if rowTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 2) and \
+                            endTestRow(self.ID * -1, copyBoard, self.X_IN_A_LINE - 2) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_THREE
+
+                    # - If the player can get 2 in a row with 2 empty spaces
+                    copyBoard[moveLoc] = self.ID
+                    if diagTest(self.ID, copyBoard, self.X_IN_A_LINE - 3) and \
+                            endTestDiag(self.ID, copyBoard, self.X_IN_A_LINE - 3) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + TWO
+
+                    if rowTest(self.ID, copyBoard, self.X_IN_A_LINE - 3) and \
+                            endTestRow(self.ID, copyBoard, self.X_IN_A_LINE - 3) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + TWO
+
+                    ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
+                        are two empty spaces '''
+                    copyBoard[moveLoc] = self.ID * -1
+                    if diagTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 3) and \
+                            endTestDiag(self.ID * -1, copyBoard, self.X_IN_A_LINE - 3) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_TWO
+
+                    if rowTest(self.ID * -1, copyBoard, self.X_IN_A_LINE - 3) and \
+                            endTestRow(self.ID * -1, copyBoard, self.X_IN_A_LINE - 3) > 1:
+                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_TWO
 
         # Takes the best action that the AI found
         bestReward = 0
