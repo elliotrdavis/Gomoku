@@ -4,6 +4,14 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
+MAX = 1000000000000000
+FOUR = 100000
+BLOCK_FOUR = 10000
+THREE = 5000
+BLOCK_THREE = 1670
+TWO = 1500
+BLOCK_TWO = 300
+MIN = 0
 
 #   @return:
 #   int giving the distance between two points
