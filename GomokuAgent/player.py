@@ -4,7 +4,8 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
-MAX = 1000000000000000
+MAX = 10000000000000000
+BLOCK_FIVE = 1000000000000
 FOUR = 100000
 BLOCK_FOUR = 10000
 THREE = 5000
@@ -137,7 +138,7 @@ class Player(GomokuAgent):
 
                     # - If the enemy has a winning move prioritise blocking that winning move
                     if winningTest(self.ID * -1, copyBoard, self.X_IN_A_LINE):
-                        rewards[(moveLoc)] = rewards[(moveLoc)] + 100
+                        rewards[(moveLoc)] = rewards[(moveLoc)] + BLOCK_FOUR
 
                     ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
                     are two empty spaces '''
