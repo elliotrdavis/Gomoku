@@ -7,13 +7,13 @@
 # Feb 2020
 #
 
-import sys, time, signal
+import sys, signal
 import numpy as np
 import os
 
 import concurrent.futures
 
-from time import time
+import time
 from random import randint
 
 from misc import winningTest, legalMove
@@ -38,7 +38,7 @@ This protects against ID spoofing
 """
 # turn taking function
 def turn(board, player, turn_id):
-
+    
     # make a copy of the board, which is passed to the agent
     tempBoard = np.array(board)
 
@@ -70,6 +70,7 @@ def turn(board, player, turn_id):
     return 0, board
 
 def main():
+    start_time = time.time()
     if len(sys.argv) < 3:
         print("Error. To use: python gomoku.py PLAYER1 PLAYER2");
         print("Example: python gomoku.py GomokuAgentRand GomokuAgentRand");
@@ -102,6 +103,7 @@ def main():
         """
         for player, turn_id in [(player1, 1), (player2, -1)]:
             id, board = turn(board, player, turn_id)
+            print("--- %s seconds ---" % (time.time()-start_time))
             print(board)
             """
             CHANGE:

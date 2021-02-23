@@ -15,4 +15,3 @@ class Player(GomokuAgent):
             moveLoc = (xInput, yInput)
             if legalMove(board, moveLoc):
                 return moveLoc
-

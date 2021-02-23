@@ -4,7 +4,6 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
-
 #   @return:
 #   int giving the distance between two points
 def distance(point1, point2):
@@ -104,6 +103,7 @@ class Player(GomokuAgent):
 
                 # - Checks if the move is legal on the current board
                 if legalMove(board, moveLoc):
+
 
                     ''' Copies the board and sets the copy board move location to the player's id
                     (Marks the player's move as the current location on the copy board) '''
