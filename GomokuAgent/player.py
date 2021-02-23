@@ -13,6 +13,7 @@ TWO = 1500
 BLOCK_TWO = 300
 MIN = 0
 
+
 #   @return:
 #   int giving the distance between two points
 def distance(point1, point2):
@@ -116,8 +117,9 @@ class Player(GomokuAgent):
 
                 # - Checks if the move is legal on the current board
                 if legalMove(board, moveLoc):
+                    ''' - Sets the base value of the reward to the max distance subtract the distance between the move 
+                    and center '''
                     rewards[moveLoc] = maxDistance - distance(moveLoc, center)
-
 
                     ''' Copies the board and sets the copy board move location to the player's id
                     (Marks the player's move as the current location on the copy board) '''
@@ -148,19 +150,12 @@ class Player(GomokuAgent):
                         rewards[(moveLoc)] = rewards[(moveLoc)] + 5
 
         # Takes the best action that the AI found
-        if np.sum(rewards) > 0:
-            bestReward = 0
-            bestMove = (0, 0)
-            for i in range(self.BOARD_SIZE):
-                for j in range(self.BOARD_SIZE):
-                    if rewards[(i, j)] > bestReward:
-                        bestMove = (i, j)
-                        bestReward = rewards[(i, j)]
+        bestReward = 0
+        bestMove = (0, 0)
+        for i in range(self.BOARD_SIZE):
+            for j in range(self.BOARD_SIZE):
+                if rewards[(i, j)] > bestReward:
+                    bestMove = (i, j)
+                    bestReward = rewards[(i, j)]
 
-            return bestMove
-
-        ''' - If no optimal move just take a random move '''
-        while True:
-            moveLoc = tuple(np.random.randint(self.BOARD_SIZE, size=2))
-            if legalMove(board, moveLoc):
-                return moveLoc
+        return bestMove
