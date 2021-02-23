@@ -21,6 +21,29 @@ def distance(point1, point2):
 
 
 #   @return:
+#   int given the centeroid of a player's points
+def centeroid(playerId, board):
+    """ - Requires use of the total x coordinates, y coordinate, and the amount of points to calculate a mean value for
+    the centeroid x and y """
+    totalX = 0
+    totalY = 0
+    totalPoints = 0
+
+    BOARD_SIZE = board.shape[0]
+
+    # = Goes through the board getting all points
+    for x in range(BOARD_SIZE):
+        for y in range(BOARD_SIZE):
+            if board(x, y) == playerId:
+                totalX = totalX + x
+                totalY = totalY + y
+                totalPoints = totalPoints + 1
+
+    # - Returns mean x value and y value
+    return (totalX / totalPoints), (totalY / totalPoints)
+
+
+#   @return:
 #   int giving number of empty spaces at ends of line for diagonals
 def endTestDiag(playerID, board, X_IN_A_LINE):
     BOARD_SIZE = board.shape[0]
