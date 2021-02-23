@@ -4,8 +4,7 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
-MAX = 10000000000000000
-BLOCK_FIVE = 1000000000000
+MAX = 1000000000000000
 FOUR = 100000
 BLOCK_FOUR = 10000
 THREE = 5000
