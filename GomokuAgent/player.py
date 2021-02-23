@@ -4,15 +4,6 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
-MAX = 1000000000000000
-FOUR = 100000
-BLOCK_FOUR = 10000
-THREE = 5000
-BLOCK_THREE = 1670
-TWO = 1500
-BLOCK_TWO = 300
-MIN = 0
-
 #   @return:
 #   int giving the distance between two points
 def distance(point1, point2):
@@ -26,6 +17,29 @@ def distance(point1, point2):
         changeY = changeY * - 1
 
     return np.sqrt((changeX ** 2) + (changeY ** 2))
+
+
+#   @return:
+#   int given the centeroid of a player's points
+def centeroid(playerId, board):
+    """ - Requires use of the total x coordinates, y coordinate, and the amount of points to calculate a mean value for
+    the centeroid x and y """
+    totalX = 0
+    totalY = 0
+    totalPoints = 0
+
+    BOARD_SIZE = board.shape[0]
+
+    # = Goes through the board getting all points
+    for x in range(BOARD_SIZE):
+        for y in range(BOARD_SIZE):
+            if board(x, y) == playerId:
+                totalX = totalX + x
+                totalY = totalY + y
+                totalPoints = totalPoints + 1
+
+    # - Returns mean x value and y value
+    return (totalX / totalPoints), (totalY / totalPoints)
 
 
 #   @return:
@@ -89,6 +103,7 @@ class Player(GomokuAgent):
 
                 # - Checks if the move is legal on the current board
                 if legalMove(board, moveLoc):
+
 
                     ''' Copies the board and sets the copy board move location to the player's id
                     (Marks the player's move as the current location on the copy board) '''
