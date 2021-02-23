@@ -6,6 +6,21 @@ from gomokuAgent import GomokuAgent
 
 
 #   @return:
+#   int giving the distance between two points
+def distance(point1, point2):
+    changeX = point2[0] - point1[0]
+    # - If distance between points is negative
+    if changeX < 0:
+        changeX = changeX * - 1
+
+    changeY = point2[1] - point1[1]
+    if changeY < 0:
+        changeY = changeY * - 1
+
+    return np.sqrt((changeX ** 2) + (changeY ** 2))
+
+
+#   @return:
 #   int giving number of empty spaces at ends of line for diagonals
 def endTestDiag(playerID, board, X_IN_A_LINE):
     BOARD_SIZE = board.shape[0]
