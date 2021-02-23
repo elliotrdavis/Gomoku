@@ -30,10 +30,10 @@ def distance(point1, point2):
 
 
 #   @return:
-#   int given the centeroid of a player's points
-def centeroid(playerId, board):
+#   int given the centroid of a player's points
+def centroid(playerId, board):
     """ - Requires use of the total x coordinates, y coordinate, and the amount of points to calculate a mean value for
-    the centeroid x and y """
+    the centroid x and y """
     totalX = 0
     totalY = 0
     totalPoints = 0
@@ -107,7 +107,7 @@ class Player(GomokuAgent):
         of player points """
         rewards = np.zeros((self.BOARD_SIZE, self.BOARD_SIZE))
         maxDistance = distance((0, 0), (self.BOARD_SIZE, self.BOARD_SIZE))
-        center = centeroid(self.ID, board)
+        center = centroid(self.ID, board)
 
         # - For every location in the board (x coordinate and y coordinate)
         for x in range(self.BOARD_SIZE):
