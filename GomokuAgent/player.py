@@ -115,7 +115,6 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     # - If the player has a winning move play that winning move
     if winningTest(ID, copyBoard, X_IN_A_LINE):
         reward = reward + MAX
-        return reward
 
     ''' - If the other player has a winning move block that move, we do x in a line -2 first to
     check if they have a checkmate type move (Imagine that a player needs to get 5 in a row if
@@ -217,63 +216,62 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
     # Takes the best action that the AI found
     # - Checks if depth is equal to 0 or the game is over
     if depth == 0 or winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-        return bestMoveAndReward(ID, board, X_IN_A_LINE)
+        reward, move = bestMoveAndReward(ID, board, X_IN_A_LINE)
+        if (maxPlayer):
+            return reward, move
+        else:
+            return (reward * -1), move
 
     BOARD_SIZE = board.shape[0]
+
     if maxPlayer:
         maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
-
         for x in range(BOARD_SIZE):
             for y in range(BOARD_SIZE):
-                # - Generates a tuple of the possible move
-                moveLoc = (x, y)
-
-                # - Checks if the move is legal on the current board
-                if legalMove(board, moveLoc):
-                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                if legalMove(board, (x, y)):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
                     copyBoard = copy.deepcopy(board)
-                    copyBoard[moveLoc] = ID
-                    evaluation, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, False)
-                    evaluation = value - evaluation
+                    copyBoard[(x, y)] = ID
+
+                    evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, False)
+                    evaluation = value + evaluation
                     if evaluation > maxEval:
                         maxEval = evaluation
-                        maxEvalPoint = moveLoc
+                        maxEvalPoint = x, y
                         alpha = max(alpha, maxEval)
-                    if beta <= alpha:
-                        break
+                if beta <= alpha:
+                    break
             if beta <= alpha:
                 break
+
         return maxEval, maxEvalPoint
 
     else:
         minEval = MAX * 7
         minEvalPoint = 0, 0
-
         for x in range(BOARD_SIZE):
             for y in range(BOARD_SIZE):
-                # - Generates a tuple of the possible move
-                moveLoc = (x, y)
-
-                # - Checks if the move is legal on the current board
-                if legalMove(board, moveLoc):
-                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                if legalMove(board, (x, y)):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
                     copyBoard = copy.deepcopy(board)
-                    copyBoard[moveLoc] = ID
-                    evaluation, move = minimax(ID * -1, board, X_IN_A_LINE, depth - 1, alpha, beta, True)
-                    evaluation = value - evaluation
+                    copyBoard[(x, y)] = ID
+
+                    evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, True)
+                    evaluation = (value * -1) + evaluation
                     if evaluation < minEval:
                         minEval = evaluation
-                        minEvalPoint = moveLoc
+                        minEvalPoint = x, y
                         beta = min(beta, minEval)
-                    if beta <= alpha:
-                        break
+                if beta <= alpha:
+                    break
             if beta <= alpha:
                 break
+
         return minEval, minEvalPoint
 
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 1, -(MAX * 7), MAX * 7, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
         return move
