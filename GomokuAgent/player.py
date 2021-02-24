@@ -102,121 +102,99 @@ def endTestRow(playerID, board, X_IN_A_LINE):
     return 0
 
 
-def minimax(ID, board, X_IN_A_LINE, depth):
-    """ Initialize the reward board, used to determine best move, the maximum distance between points and the center
-        of player points """
+def rewardAtPoint(ID, board, X_IN_A_LINE, point):
+    """ - Sets the base value of the reward to the max distance subtract the distance between the move
+        and center """
+    maxDistance = distance((0, 0), (board.shape[0], board.shape[0]))
+    center = centroid(ID, board)
+    reward = maxDistance - distance(point, center)
+
+    copyBoard = copy.deepcopy(board)
+    copyBoard[point] = ID
+
+    # - If the player has a winning move play that winning move
+    if winningTest(ID, copyBoard, X_IN_A_LINE):
+        reward = reward + MAX
+
+    ''' - If the other player has a winning move block that move, we do x in a line -2 first to
+    check if they have a checkmate type move (Imagine that a player needs to get 5 in a row if
+    they have 3 in a row with both sides open they can place on one either side to get the win)'''
+    copyBoard[point] = ID * -1
+
+    # - If the enemy has a winning move prioritise blocking that winning move
+    if winningTest(ID * -1, copyBoard, X_IN_A_LINE):
+        reward = reward + BLOCK_FIVE
+
+    # - If the player can get 4 in a row with 2 empty spaces
+    copyBoard[point] = ID
+    if diagTest(ID, copyBoard, X_IN_A_LINE - 1) and \
+            endTestDiag(ID, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + FOUR
+
+    if rowTest(ID, copyBoard, X_IN_A_LINE - 1) and \
+            endTestRow(ID, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + FOUR
+
+    ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
+    are two empty spaces '''
+    copyBoard[point] = ID * -1
+    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
+            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + BLOCK_FOUR
+
+    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
+            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + BLOCK_FOUR
+
+    # - If the player can get 3 in a row with 2 empty spaces
+    copyBoard[point] = ID
+    if diagTest(ID, copyBoard, X_IN_A_LINE - 2) and \
+            endTestDiag(ID, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + THREE
+
+    if rowTest(ID, copyBoard, X_IN_A_LINE - 2) and \
+            endTestRow(ID, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + THREE
+
+    ''' If the enemy can get 2 in a row/diagonal angle we want to block them from getting 3 if there
+        are two empty spaces '''
+    copyBoard[point] = ID * -1
+    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
+            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + BLOCK_FOUR
+
+    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
+            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + BLOCK_THREE
+
+    # - If the player can get 2 in a row with 2 empty spaces
+    copyBoard[point] = ID
+    if diagTest(ID, copyBoard, X_IN_A_LINE - 3) and \
+            endTestDiag(ID, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + TWO
+
+    if rowTest(ID, copyBoard, X_IN_A_LINE - 3) and \
+            endTestRow(ID, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + TWO
+
+    ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
+        are two empty spaces '''
+    copyBoard[point] = ID * -1
+    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
+            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + BLOCK_TWO
+
+    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
+            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + BLOCK_TWO
+
+    return reward
+
+
+def bestMoveAndReward(ID, board, X_IN_A_LINE):
     BOARD_SIZE = board.shape[0]
     rewards = np.zeros((BOARD_SIZE, BOARD_SIZE))
-    maxDistance = distance((0, 0), (BOARD_SIZE, BOARD_SIZE))
-    center = centroid(ID, board)
 
-    # Takes the best action that the AI found
-    # - Checks if depth is equal to 0 or the game is over
-    if depth == 0 or winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-        for x in range(BOARD_SIZE):
-            for y in range(BOARD_SIZE):
-                # - Generates a tuple of the possible move
-                moveLoc = (x, y)
-
-                # - Checks if the move is legal on the current board
-                if legalMove(board, moveLoc):
-                    ''' - Sets the base value of the reward to the max distance subtract the distance between the move 
-                        and center '''
-                    rewards[moveLoc] = maxDistance - distance(moveLoc, center)
-
-                    copyBoard = copy.deepcopy(board)
-                    copyBoard[moveLoc] = ID
-
-                    # - If the player has a winning move play that winning move
-                    if winningTest(ID, copyBoard, X_IN_A_LINE):
-                        rewards[moveLoc] = rewards[moveLoc] + MAX
-
-                    ''' - If the other player has a winning move block that move, we do x in a line -2 first to
-                    check if they have a checkmate type move (Imagine that a player needs to get 5 in a row if
-                    they have 3 in a row with both sides open they can place on one either side to get the win)'''
-                    copyBoard[moveLoc] = ID * -1
-
-                    # - If the enemy has a winning move prioritise blocking that winning move
-                    if winningTest(ID * -1, copyBoard, X_IN_A_LINE):
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FIVE
-
-                    # - If the player can get 4 in a row with 2 empty spaces
-                    copyBoard[moveLoc] = ID
-                    if diagTest(ID, copyBoard, X_IN_A_LINE - 1) and \
-                            endTestDiag(ID, copyBoard, X_IN_A_LINE - 1) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + FOUR
-
-                    if rowTest(ID, copyBoard, X_IN_A_LINE - 1) and \
-                            endTestRow(ID, copyBoard, X_IN_A_LINE - 1) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + FOUR
-
-                    ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
-                    are two empty spaces '''
-                    copyBoard[moveLoc] = ID * -1
-                    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
-                            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FOUR
-
-                    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
-                            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FOUR
-
-                    # - If the player can get 3 in a row with 2 empty spaces
-                    copyBoard[moveLoc] = ID
-                    if diagTest(ID, copyBoard, X_IN_A_LINE - 2) and \
-                            endTestDiag(ID, copyBoard, X_IN_A_LINE - 2) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + THREE
-
-                    if rowTest(ID, copyBoard, X_IN_A_LINE - 2) and \
-                            endTestRow(ID, copyBoard, X_IN_A_LINE - 2) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + THREE
-
-                    ''' If the enemy can get 2 in a row/diagonal angle we want to block them from getting 3 if there
-                        are two empty spaces '''
-                    copyBoard[moveLoc] = ID * -1
-                    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
-                            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_FOUR
-
-                    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
-                            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_THREE
-
-                    # - If the player can get 2 in a row with 2 empty spaces
-                    copyBoard[moveLoc] = ID
-                    if diagTest(ID, copyBoard, X_IN_A_LINE - 3) and \
-                            endTestDiag(ID, copyBoard, X_IN_A_LINE - 3) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + TWO
-
-                    if rowTest(ID, copyBoard, X_IN_A_LINE - 3) and \
-                            endTestRow(ID, copyBoard, X_IN_A_LINE - 3) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + TWO
-
-                    ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
-                        are two empty spaces '''
-                    copyBoard[moveLoc] = ID * -1
-                    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
-                            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_TWO
-
-                    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
-                            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
-                        rewards[moveLoc] = rewards[moveLoc] + BLOCK_TWO
-
-        bestReward = 0
-        bestRewardPoint = 0, 0
-        for i in range(BOARD_SIZE):
-            for j in range(BOARD_SIZE):
-                if rewards[(i, j)] > bestReward:
-                    bestReward = rewards[(i, j)]
-                    bestRewardPoint = i, j
-
-        return bestReward, bestRewardPoint
-
-    maxEval = 0
-    maxEvalPoint = (0, 0)
-
-    # - For every location in the board (x coordinate and y coordinate)
     for x in range(BOARD_SIZE):
         for y in range(BOARD_SIZE):
             # - Generates a tuple of the possible move
@@ -224,17 +202,86 @@ def minimax(ID, board, X_IN_A_LINE, depth):
 
             # - Checks if the move is legal on the current board
             if legalMove(board, moveLoc):
-                copyBoard = copy.deepcopy(board)
-                copyBoard[moveLoc] = ID
+                rewards[moveLoc] = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
 
-                eval, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, depth - 1)
-                if eval > maxEval:
-                    maxEval = eval
-                    maxEvalPoint = moveLoc
-    return maxEval, maxEvalPoint
+    bestReward = 0
+    bestRewardPoint = 0, 0
+    for i in range(BOARD_SIZE):
+        for j in range(BOARD_SIZE):
+            if rewards[(i, j)] > bestReward:
+                bestReward = rewards[(i, j)]
+                bestRewardPoint = i, j
+
+    return bestReward, bestRewardPoint
+
+
+def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
+    BOARD_SIZE = board.shape[0]
+
+    # Takes the best action that the AI found
+    # - Checks if depth is equal to 0 or the game is over
+    if depth == 0 or winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
+        if maxPlayer:
+            return bestMoveAndReward(ID, board, X_IN_A_LINE)
+        else:
+            reward, move = bestMoveAndReward(ID, board, X_IN_A_LINE)
+            return -reward, move
+
+    if maxPlayer:
+        maxEval = -100000000000000000000000000000
+        maxEvalPoint = (0, 0)
+
+        # - For every location in the board (x coordinate and y coordinate)
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                # - Generates a tuple of the possible move
+                moveLoc = (x, y)
+
+                # - Checks if the move is legal on the current board
+                if legalMove(board, moveLoc):
+                    copyBoard = copy.deepcopy(board)
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                    copyBoard[moveLoc] = ID
+
+                    eval, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, False)
+                    eval = eval + value
+                    if eval > maxEval:
+                        maxEval = eval
+                        maxEvalPoint = moveLoc
+                        alpha = max(alpha, eval)
+                        if beta <= alpha:
+                            break
+        return maxEval, maxEvalPoint
+
+    else:
+        minEval = 100000000000000000000000000000000
+        minEvalPoint = (0, 0)
+
+        # - For every location in the board (x coordinate and y coordinate)
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                # - Generates a tuple of the possible move
+                moveLoc = (x, y)
+
+                # - Checks if the move is legal on the current board
+                if legalMove(board, moveLoc):
+                    copyBoard = copy.deepcopy(board)
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                    copyBoard[moveLoc] = ID
+
+                    eval, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, True)
+                    eval = eval - value
+                    if eval < minEval:
+                        minEval = eval
+                        minEvalPoint = moveLoc
+                        beta = min(beta, eval)
+                        if beta <= alpha:
+                            break
+        return minEval, minEvalPoint
 
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 1)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 1, -100000000000000000000000000000000,
+                              100000000000000000000000000000000, True)
         return move
