@@ -212,22 +212,55 @@ def bestMoveAndReward(ID, board, X_IN_A_LINE):
     return bestReward, bestRewardPoint
 
 
-def minimax(ID, board, X_IN_A_LINE, depth):
+def minimax(ID, board, X_IN_A_LINE, depth, maxPlayer):
     # Takes the best action that the AI found
     # - Checks if depth is equal to 0 or the game is over
     if depth == 0 or winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
         return bestMoveAndReward(ID, board, X_IN_A_LINE)
 
-    """
-    
-    ---------------------------------------------------
-    INSERT CODE FOR MIN MAX AND ALPHA BETA PRUNING HERE
-    ---------------------------------------------------
-    
-    """
+    BOARD_SIZE = board.shape[0]
+    if maxPlayer:
+        maxEval = -(MAX * 7)
+        maxEvalPoint = 0, 0
+
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                # - Generates a tuple of the possible move
+                moveLoc = (x, y)
+
+                # - Checks if the move is legal on the current board
+                if legalMove(board, moveLoc):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                    evaluation, move = minimax(ID, board, X_IN_A_LINE, depth - 1, True)
+                    evaluation = evaluation - value
+                    if evaluation > maxEval:
+                        maxEval = evaluation
+                        maxEvalPoint = moveLoc
+
+        return maxEval, maxEvalPoint
+
+    else:
+        minEval = MAX * 7
+        minEvalPoint = 0, 0
+
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                # - Generates a tuple of the possible move
+                moveLoc = (x, y)
+
+                # - Checks if the move is legal on the current board
+                if legalMove(board, moveLoc):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                    evaluation, move = minimax(ID, board, X_IN_A_LINE, depth - 1, True)
+                    evaluation = evaluation - value
+                    if evaluation < minEval:
+                        minEval = evaluation
+                        minEvalPoint = moveLoc
+
+        return minEval, minEvalPoint
 
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 1, False)
         return move
