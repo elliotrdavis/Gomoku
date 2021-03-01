@@ -181,7 +181,7 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
     BOARD_SIZE = board.shape[0]
 
     if maxPlayer:
-        maxEval = -(MAX * 7)
+        maxEval = float('-inf')
         maxEvalPoint = 0, 0
         for x in range(BOARD_SIZE):
             for y in range(BOARD_SIZE):
@@ -206,7 +206,7 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
         return maxEval, maxEvalPoint
 
     else:
-        minEval = MAX * 7
+        minEval = float('inf')
         minEvalPoint = 0, 0
         for x in range(BOARD_SIZE):
             for y in range(BOARD_SIZE):
