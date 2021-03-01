@@ -105,6 +105,12 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     # - This is a fixed amount each amount doubles each possible move
     incrementalReward = 1000
 
+    if winningTest(ID, copyBoard, X_IN_A_LINE):
+        return incrementalReward * (X_IN_A_LINE * 10)
+
+    if winningTest(ID * -1, copyBoard, X_IN_A_LINE):
+        return incrementalReward * (X_IN_A_LINE * 7)
+
     for x in range(2, X_IN_A_LINE + 1):
         copyBoard[point] = ID * -1
         copyBoardPrime = np.rot90(copyBoard)
