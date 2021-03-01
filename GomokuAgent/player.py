@@ -274,6 +274,7 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
                 break
 
         return minEval, minEvalPoint
+    print("hi")
 
 
 class Player(GomokuAgent):
