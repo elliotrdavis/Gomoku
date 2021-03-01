@@ -114,14 +114,12 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     return reward1 + reward2
 
 
-def rewardAtPointAux(ID, board, X_IN_A_LINE, point):
+def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
     """ - Sets the base value of the reward to the max distance subtract the distance between the move
         and center """
-    maxDistance = distance((0, 0), (board.shape[0], board.shape[0]))
-    center = centroid(ID, board)
+    maxDistance = distance((0, 0), (copyBoard.shape[0], copyBoard.shape[0]))
+    center = centroid(ID, copyBoard)
     reward = maxDistance - distance(point, center)
-
-    copyBoard = copy.deepcopy(board)
     copyBoard[point] = ID
 
     # - If the player has a winning move play that winning move
@@ -295,5 +293,5 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 1, -MAX, MAX, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, -MAX, MAX, True)
         return move
