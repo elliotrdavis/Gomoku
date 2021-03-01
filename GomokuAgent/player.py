@@ -7,7 +7,7 @@ from gomokuAgent import GomokuAgent
 MAX = 1000000000000000
 BLOCK_FIVE = 100000000
 FOUR = 100000
-BLOCK_FOUR = 20000
+BLOCK_FOUR = 30000
 THREE = 5000
 BLOCK_THREE = 1670
 TWO = 1500
@@ -103,6 +103,18 @@ def endTestRow(playerID, board, X_IN_A_LINE):
 
 
 def rewardAtPoint(ID, board, X_IN_A_LINE, point):
+    copyBoard = copy.deepcopy(board)
+    reward1 = rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point)
+
+    copyBoardPrime = copy.deepcopy(board)
+    copyBoardPrime = np.rot90(copyBoardPrime)
+    pointPrime = (len(board) - 1 - point[1], point[0])
+    reward2 = rewardAtPointAux(ID, copyBoardPrime, X_IN_A_LINE, pointPrime)
+
+    return reward1 + reward2
+
+
+def rewardAtPointAux(ID, board, X_IN_A_LINE, point):
     """ - Sets the base value of the reward to the max distance subtract the distance between the move
         and center """
     maxDistance = distance((0, 0), (board.shape[0], board.shape[0]))
@@ -123,129 +135,75 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
 
     # - If the enemy has a winning move prioritise blocking that winning move
     if winningTest(ID * -1, copyBoard, X_IN_A_LINE):
-        reward = reward + BLOCK_FIVE
+        return BLOCK_FIVE
 
     # - If the player can get 4 in a row with 2 empty spaces
     copyBoard[point] = ID
-    boardPrime = np.rot90(copyBoard)
 
     if diagTest(ID, copyBoard, X_IN_A_LINE - 1) and \
             endTestDiag(ID, copyBoard, X_IN_A_LINE - 1) > 1:
-        reward = reward + FOUR
-
-    if diagTest(ID, boardPrime, X_IN_A_LINE - 1) and \
-            endTestDiag(ID, boardPrime, X_IN_A_LINE - 1) > 1:
         reward = reward + FOUR
 
     if rowTest(ID, copyBoard, X_IN_A_LINE - 1) and \
             endTestRow(ID, copyBoard, X_IN_A_LINE - 1) > 1:
         reward = reward + FOUR
 
-    if rowTest(ID, boardPrime, X_IN_A_LINE - 1) and \
-            endTestRow(ID, boardPrime, X_IN_A_LINE - 1) > 1:
-        reward = reward + FOUR
-
     ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
     are two empty spaces '''
     copyBoard[point] = ID * -1
-    boardPrime = np.rot90(copyBoard)
 
     if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
             endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
-        reward = reward + BLOCK_FOUR
-
-    if diagTest(ID * -1, boardPrime, X_IN_A_LINE - 1) and \
-            endTestDiag(ID * -1, boardPrime, X_IN_A_LINE - 1) > 1:
         reward = reward + BLOCK_FOUR
 
     if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
             endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
         reward = reward + BLOCK_FOUR
 
-    if rowTest(ID * -1, boardPrime, X_IN_A_LINE - 1) and \
-            endTestRow(ID * -1, boardPrime, X_IN_A_LINE - 1) > 1:
-        reward = reward + BLOCK_FOUR
-
     # - If the player can get 3 in a row with 2 empty spaces
     copyBoard[point] = ID
-    boardPrime = np.rot90(copyBoard)
 
     if diagTest(ID, copyBoard, X_IN_A_LINE - 2) and \
             endTestDiag(ID, copyBoard, X_IN_A_LINE - 2) > 1:
-        reward = reward + THREE
-
-    if diagTest(ID, boardPrime, X_IN_A_LINE - 2) and \
-            endTestDiag(ID, boardPrime, X_IN_A_LINE - 2) > 1:
         reward = reward + THREE
 
     if rowTest(ID, copyBoard, X_IN_A_LINE - 2) and \
             endTestRow(ID, copyBoard, X_IN_A_LINE - 2) > 1:
         reward = reward + THREE
 
-    if rowTest(ID, boardPrime, X_IN_A_LINE - 2) and \
-            endTestRow(ID, boardPrime, X_IN_A_LINE - 2) > 1:
-        reward = reward + THREE
-
     ''' If the enemy can get 2 in a row/diagonal angle we want to block them from getting 3 if there
         are two empty spaces '''
     copyBoard[point] = ID * -1
-    boardPrime = np.rot90(copyBoard)
 
     if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
             endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
-        reward = reward + BLOCK_FOUR
-
-    if diagTest(ID * -1, boardPrime, X_IN_A_LINE - 2) and \
-            endTestDiag(ID * -1, boardPrime, X_IN_A_LINE - 2) > 1:
         reward = reward + BLOCK_FOUR
 
     if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
             endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
         reward = reward + BLOCK_THREE
 
-    if rowTest(ID * -1, boardPrime, X_IN_A_LINE - 2) and \
-            endTestRow(ID * -1, boardPrime, X_IN_A_LINE - 2) > 1:
-        reward = reward + BLOCK_THREE
-
     # - If the player can get 2 in a row with 2 empty spaces
     copyBoard[point] = ID
-    boardPrime = np.rot90(copyBoard)
 
     if diagTest(ID, copyBoard, X_IN_A_LINE - 3) and \
             endTestDiag(ID, copyBoard, X_IN_A_LINE - 3) > 1:
-        reward = reward + TWO
-
-    if diagTest(ID, boardPrime, X_IN_A_LINE - 3) and \
-            endTestDiag(ID, boardPrime, X_IN_A_LINE - 3) > 1:
         reward = reward + TWO
 
     if rowTest(ID, copyBoard, X_IN_A_LINE - 3) and \
             endTestRow(ID, copyBoard, X_IN_A_LINE - 3) > 1:
         reward = reward + TWO
 
-    if rowTest(ID, boardPrime, X_IN_A_LINE - 3) and \
-            endTestRow(ID, boardPrime, X_IN_A_LINE - 3) > 1:
-        reward = reward + TWO
-
     ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
         are two empty spaces '''
     copyBoard[point] = ID * -1
-    boardPrime = np.rot90(copyBoard)
 
     if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
             endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
         reward = reward + BLOCK_TWO
 
-    if diagTest(ID * -1, boardPrime, X_IN_A_LINE - 3) and \
-            endTestDiag(ID * -1, boardPrime, X_IN_A_LINE - 3) > 1:
-        reward = reward + BLOCK_TWO
-
     if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
             endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
-        reward = reward + BLOCK_TWO
-
-    if rowTest(ID * -1, boardPrime, X_IN_A_LINE - 3) and \
-            endTestRow(ID * -1, boardPrime, X_IN_A_LINE - 3) > 1:
         reward = reward + BLOCK_TWO
 
     return reward
@@ -339,4 +297,3 @@ class Player(GomokuAgent):
     def move(self, board):
         score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, -MAX, MAX, True)
         return move
-
