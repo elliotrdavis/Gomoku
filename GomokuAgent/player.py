@@ -4,16 +4,6 @@ import copy
 from misc import legalMove, winningTest, diagTest, rowTest
 from gomokuAgent import GomokuAgent
 
-MAX = 1000000000000000
-BLOCK_FIVE = 100000000
-FOUR = 100000
-BLOCK_FOUR = 20000
-THREE = 5000
-BLOCK_THREE = 1670
-TWO = 1500
-BLOCK_TWO = 300
-MIN = 0
-
 
 #   @return:
 #   int giving the distance between two points
@@ -112,81 +102,46 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     copyBoard = copy.deepcopy(board)
     copyBoard[point] = ID
 
-    # - If the player has a winning move play that winning move
-    if winningTest(ID, copyBoard, X_IN_A_LINE):
-        reward = reward + MAX
+    # - This is a fixed amount each amount doubles each possible move
+    incrementalAmount = 1000
 
-    ''' - If the other player has a winning move block that move, we do x in a line -2 first to
-    check if they have a checkmate type move (Imagine that a player needs to get 5 in a row if
-    they have 3 in a row with both sides open they can place on one either side to get the win)'''
-    copyBoard[point] = ID * -1
+    for x in range(2, X_IN_A_LINE + 1):
+        copyBoard[point] = ID * -1
+        boardPrime = np.rot90(copyBoard)
 
-    # - If the enemy has a winning move prioritise blocking that winning move
-    if winningTest(ID * -1, copyBoard, X_IN_A_LINE):
-        reward = reward + BLOCK_FIVE
+        # - If the player can get 4 in a row with 2 empty spaces
+        if diagTest(ID * - 1, copyBoard, x) and \
+                endTestDiag(ID * -1, copyBoard, x) > 1:
+            reward = reward + incrementalAmount
 
-    # - If the player can get 4 in a row with 2 empty spaces
-    copyBoard[point] = ID
-    if diagTest(ID, copyBoard, X_IN_A_LINE - 1) and \
-            endTestDiag(ID, copyBoard, X_IN_A_LINE - 1) > 1:
-        reward = reward + FOUR
+        if diagTest(ID * - 1, boardPrime, x) and \
+                endTestDiag(ID * -1, boardPrime, x) > 1:
+            reward = reward + incrementalAmount
 
-    if rowTest(ID, copyBoard, X_IN_A_LINE - 1) and \
-            endTestRow(ID, copyBoard, X_IN_A_LINE - 1) > 1:
-        reward = reward + FOUR
+        # - If the player can get 4 in a row with 2 empty spaces
+        if rowTest(ID * - 1, copyBoard, x) and \
+                endTestRow(ID * -1, copyBoard, x) > 1:
+            reward = reward + incrementalAmount
 
-    ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
-    are two empty spaces '''
-    copyBoard[point] = ID * -1
-    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
-            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
-        reward = reward + BLOCK_FOUR
+        if rowTest(ID * - 1, boardPrime, x) and \
+                endTestRow(ID * -1, boardPrime, x) > 1:
+            reward = reward + incrementalAmount
 
-    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
-            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
-        reward = reward + BLOCK_FOUR
+        incrementalAmount = incrementalAmount * 5
 
-    # - If the player can get 3 in a row with 2 empty spaces
-    copyBoard[point] = ID
-    if diagTest(ID, copyBoard, X_IN_A_LINE - 2) and \
-            endTestDiag(ID, copyBoard, X_IN_A_LINE - 2) > 1:
-        reward = reward + THREE
+        copyBoard[point] = ID
+        boardPrime = np.rot90(copyBoard)
 
-    if rowTest(ID, copyBoard, X_IN_A_LINE - 2) and \
-            endTestRow(ID, copyBoard, X_IN_A_LINE - 2) > 1:
-        reward = reward + THREE
+        # - If the player can get 4 in a row with 2 empty spaces
+        if diagTest(ID, copyBoard, x) and \
+                endTestDiag(ID, copyBoard, x) > 1:
+            reward = reward + incrementalAmount
 
-    ''' If the enemy can get 2 in a row/diagonal angle we want to block them from getting 3 if there
-        are two empty spaces '''
-    copyBoard[point] = ID * -1
-    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
-            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
-        reward = reward + BLOCK_FOUR
+        if diagTest(ID, boardPrime, x) and \
+                endTestDiag(ID, boardPrime, x) > 1:
+            reward = reward + incrementalAmount
 
-    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
-            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
-        reward = reward + BLOCK_THREE
-
-    # - If the player can get 2 in a row with 2 empty spaces
-    copyBoard[point] = ID
-    if diagTest(ID, copyBoard, X_IN_A_LINE - 3) and \
-            endTestDiag(ID, copyBoard, X_IN_A_LINE - 3) > 1:
-        reward = reward + TWO
-
-    if rowTest(ID, copyBoard, X_IN_A_LINE - 3) and \
-            endTestRow(ID, copyBoard, X_IN_A_LINE - 3) > 1:
-        reward = reward + TWO
-
-    ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
-        are two empty spaces '''
-    copyBoard[point] = ID * -1
-    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
-            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
-        reward = reward + BLOCK_TWO
-
-    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
-            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
-        reward = reward + BLOCK_TWO
+        incrementalAmount = incrementalAmount * 5
 
     return reward
 
@@ -278,5 +233,5 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, -MAX, MAX, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, 0, 0, True)
         return move
