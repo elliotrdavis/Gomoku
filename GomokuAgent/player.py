@@ -103,45 +103,45 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     copyBoard[point] = ID
 
     # - This is a fixed amount each amount doubles each possible move
-    incrementalAmount = 1000
+    incrementalReward = 1000
 
     for x in range(2, X_IN_A_LINE + 1):
         copyBoard[point] = ID * -1
-        boardPrime = np.rot90(copyBoard)
+        copyBoardPrime = np.rot90(copyBoard)
 
         # - If the player can get 4 in a row with 2 empty spaces
         if diagTest(ID * - 1, copyBoard, x) and \
                 endTestDiag(ID * -1, copyBoard, x) > 1:
-            reward = reward + incrementalAmount
+            reward = reward + incrementalReward
 
-        if diagTest(ID * - 1, boardPrime, x) and \
-                endTestDiag(ID * -1, boardPrime, x) > 1:
-            reward = reward + incrementalAmount
+        if diagTest(ID * - 1, copyBoardPrime, x) and \
+                endTestDiag(ID * -1, copyBoardPrime, x) > 1:
+            reward = reward + incrementalReward
 
         # - If the player can get 4 in a row with 2 empty spaces
         if rowTest(ID * - 1, copyBoard, x) and \
                 endTestRow(ID * -1, copyBoard, x) > 1:
-            reward = reward + incrementalAmount
+            reward = reward + incrementalReward
 
-        if rowTest(ID * - 1, boardPrime, x) and \
-                endTestRow(ID * -1, boardPrime, x) > 1:
-            reward = reward + incrementalAmount
+        if rowTest(ID * - 1, copyBoardPrime, x) and \
+                endTestRow(ID * -1, copyBoardPrime, x) > 1:
+            reward = reward + incrementalReward
 
-        incrementalAmount = incrementalAmount * 5
+        incrementalReward = incrementalReward * 5
 
         copyBoard[point] = ID
-        boardPrime = np.rot90(copyBoard)
+        copyBoardPrime = np.rot90(copyBoard)
 
         # - If the player can get 4 in a row with 2 empty spaces
         if diagTest(ID, copyBoard, x) and \
                 endTestDiag(ID, copyBoard, x) > 1:
-            reward = reward + incrementalAmount
+            reward = reward + incrementalReward
 
-        if diagTest(ID, boardPrime, x) and \
-                endTestDiag(ID, boardPrime, x) > 1:
-            reward = reward + incrementalAmount
+        if diagTest(ID, copyBoardPrime, x) and \
+                endTestDiag(ID, copyBoardPrime, x) > 1:
+            reward = reward + incrementalReward
 
-        incrementalAmount = incrementalAmount * 5
+        incrementalReward = incrementalReward * 5
 
     return reward
 
