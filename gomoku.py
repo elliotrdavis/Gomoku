@@ -18,9 +18,9 @@ from random import randint
 
 from misc import winningTest, legalMove
 
-BOARD_SIZE = 11  # size of the board is 11-by-11
+BOARD_SIZE = 6  # size of the board is 11-by-11
 X_IN_A_LINE = 5  # play the standard game with 5 stones in a line
-TIME_OUT = 5  # player must return a move within 5 seconds
+TIME_OUT = 10000  # player must return a move within 5 seconds
 
 
 # an empty class to host the time-out exception
