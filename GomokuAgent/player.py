@@ -7,7 +7,7 @@ from gomokuAgent import GomokuAgent
 MAX = 1000000000000000
 BLOCK_FIVE = 100000000
 FOUR = 100000
-BLOCK_FOUR = 10000
+BLOCK_FOUR = 20000
 THREE = 5000
 BLOCK_THREE = 1670
 TWO = 1500
@@ -209,6 +209,7 @@ def bestMoveAndReward(ID, board, X_IN_A_LINE):
                     bestReward = rewards[moveLoc]
                     bestRewardPoint = moveLoc
 
+    print(np.round(rewards))
     return bestReward, bestRewardPoint
 
 
@@ -229,16 +230,18 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
         maxEvalPoint = 0, 0
         for x in range(BOARD_SIZE):
             for y in range(BOARD_SIZE):
-                if legalMove(board, (x, y)):
+                moveLoc = (x, y)
+
+                if legalMove(board, moveLoc):
                     value = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
                     copyBoard = copy.deepcopy(board)
-                    copyBoard[(x, y)] = ID
+                    copyBoard[moveLoc] = ID
 
                     evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, False)
                     evaluation = value + evaluation
                     if evaluation > maxEval:
                         maxEval = evaluation
-                        maxEvalPoint = x, y
+                        maxEvalPoint = moveLoc
                         alpha = max(alpha, maxEval)
                 if beta <= alpha:
                     break
@@ -252,16 +255,18 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
         minEvalPoint = 0, 0
         for x in range(BOARD_SIZE):
             for y in range(BOARD_SIZE):
-                if legalMove(board, (x, y)):
-                    value = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
+                moveLoc = (x, y)
+
+                if legalMove(board, moveLoc):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
                     copyBoard = copy.deepcopy(board)
-                    copyBoard[(x, y)] = ID
+                    copyBoard[moveLoc] = ID
 
                     evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, True)
                     evaluation = (value * -1) + evaluation
                     if evaluation < minEval:
                         minEval = evaluation
-                        minEvalPoint = x, y
+                        minEvalPoint = moveLoc
                         beta = min(beta, minEval)
                 if beta <= alpha:
                     break
@@ -273,5 +278,5 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, -MAX, MAX, True)
         return move
