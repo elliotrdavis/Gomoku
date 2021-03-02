@@ -3,7 +3,6 @@ import copy
 
 from misc import legalMove, diagTest, rowTest, winningTest
 from gomokuAgent import GomokuAgent
-from gomokuAgent import GomokuAgent
 
 
 #   @return:
@@ -183,8 +182,9 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
             score, move = minValue(ID, copyBoard, X_IN_A_LINE)
-            if score > v:
-                v = max(v, score)
+            score2, move2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+            if score + score2 > v:
+                v = max(v, score + score2)
                 maxMove = x
         return v, maxMove
 
@@ -198,8 +198,9 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
             score, move = maxValue(ID, copyBoard, X_IN_A_LINE)
-            if score < v:
-                v = min(v, score)
+            score2, move2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+            if score - score2 < v:
+                v = min(v, score - score2)
                 minMove = x
         return v, minMove
 
@@ -209,4 +210,6 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
 class Player(GomokuAgent):
     def move(self, board):
         score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE)
+        print(score)
+        print(move)
         return move
