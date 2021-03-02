@@ -170,61 +170,6 @@ def getBestMove(board, ID, X_IN_A_LINE):
     return maxRewardPoint
 
 
-# Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
-# and lines a player has on the board.
-def evaluateBoard(playerID, board, X_IN_A_LINE):
-    score = 0
-    copyBoard = copy.deepcopy(board)
-    score += scoreRows(playerID, copyBoard, X_IN_A_LINE) + scoreDiags(playerID, copyBoard, X_IN_A_LINE)
-
-    rotatedBoard = np.rot90(copyBoard)
-    score += scoreRows(playerID, rotatedBoard, X_IN_A_LINE) + scoreDiags(playerID, rotatedBoard, X_IN_A_LINE)
-
-    return score
-
-
-def scoreRows(playerID, board, X_IN_A_LINE):
-    boardScore = 0
-    BOARD_SIZE = board.shape[0]
-    for r in range(BOARD_SIZE - X_IN_A_LINE + 1):
-        for c in range(BOARD_SIZE - X_IN_A_LINE + 1):
-            rowLength = 0
-            blocked = False
-            for i in range(X_IN_A_LINE):
-                if board[r + i, c] == playerID:
-                    rowLength += 1
-                elif board[r + i, c] == -playerID:
-                    blocked = True
-                    break
-            if not blocked:
-                boardScore += lineScore(rowLength, X_IN_A_LINE)
-    return boardScore
-
-
-def scoreDiags(playerID, board, X_IN_A_LINE):
-    boardScore = 0
-    BOARD_SIZE = board.shape[0]
-    for r in range(BOARD_SIZE - X_IN_A_LINE + 1):
-        for c in range(BOARD_SIZE - X_IN_A_LINE + 1):
-            rowLength = 0
-            blocked = False
-            for i in range(X_IN_A_LINE):
-                if board[r + i, c + i] == playerID:
-                    rowLength += 1
-                elif board[r + i, c + i] == -playerID:
-                    blocked = True
-                    break
-            if not blocked:
-                boardScore += lineScore(rowLength, X_IN_A_LINE)
-    return boardScore
-
-
-def lineScore(lineLength, X_IN_A_LINE):
-    if lineLength == X_IN_A_LINE:
-        return 2 ** (lineLength ** 2)
-    return 2 ** lineLength
-
-
 def minimaxDecision(ID, board, X_IN_A_LINE):
     'calculate the best move by searching forward all the way to the terminal state'
 
@@ -234,16 +179,18 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
 
         v = -np.inf
         for x in generateMoves(board):
-            v = max(v, minValue(rewardAtPoint(ID, board, X_IN_A_LINE, x)))
+            copyBoard = copy.deepcopy(board)
+            copyBoard[x] = ID
+            v = max(v, minValue(ID, copyBoard, X_IN_A_LINE))
         return v
 
-    def minValue(state):
+    def minValue(ID, board, X_IN_A_LINE):
         if winningTest(ID, board, X_IN_A_LINE):
             return getBestMove(ID, board, X_IN_A_LINE)
 
         v = -np.inf
         for x in generateMoves(board):
-            v = min(v, maxValue(rewardAtPoint(ID, board, X_IN_A_LINE, x)))
+            v = min(v, maxValue(ID, board, X_IN_A_LINE))
         return v
 
     return max(generateMoves(board), key=lambda x: minValue(rewardAtPoint(ID, board, X_IN_A_LINE, x)))
