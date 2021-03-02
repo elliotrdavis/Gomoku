@@ -236,9 +236,8 @@ def generateMoves(board):
         for c in range(BOARD_SIZE):
             move = (r, c)
             if legalMove(board, move):
-                moves.add(move)
+                moves.append(move)
     return moves
-
 
 
 # Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
@@ -294,7 +293,6 @@ def lineScore(lineLength, X_IN_A_LINE):
     if lineLength == X_IN_A_LINE:
         return 2 ** (lineLength ** 2)
     return 2 ** lineLength
-
 
 
 def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):

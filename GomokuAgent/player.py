@@ -240,7 +240,6 @@ def generateMoves(board):
     return moves
 
 
-
 # Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
 # and lines a player has on the board.
 def evaluateBoard(playerID, board, X_IN_A_LINE):
@@ -294,7 +293,6 @@ def lineScore(lineLength, X_IN_A_LINE):
     if lineLength == X_IN_A_LINE:
         return 2 ** (lineLength ** 2)
     return 2 ** lineLength
-
 
 
 def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
@@ -362,6 +360,6 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, -MAX, MAX, True)
         print(move)
         return move
