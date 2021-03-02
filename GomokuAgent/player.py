@@ -104,7 +104,6 @@ def endTestRow(playerID, board, X_IN_A_LINE):
 
 
 def rewardAtPoint(ID, board, X_IN_A_LINE, point):
-    """ Gets the reward from both the prime version of the board after rotating 90 degrees """
     copyBoard = copy.deepcopy(board)
     reward1 = rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point)
 
@@ -117,12 +116,8 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
 
 
 def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
-    """ This method could have been completed using a for loop, (for x in range(0, X_IN_A_LINE + 1) however
-    considering the spec specifies a fixed game board size and a fixed x_in_a_line number of 5 we choose
-    to stick to hard coding the weightings"""
-
-    ''' - Sets the base value of the reward to the max distance subtract the distance between the move
-        and center '''
+    """ - Sets the base value of the reward to the max distance subtract the distance between the move
+        and center """
     maxDistance = distance((0, 0), (copyBoard.shape[0], copyBoard.shape[0]))
     center = centroid(ID, copyBoard)
     reward = maxDistance - distance(point, center)
@@ -213,8 +208,7 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
     return reward
 
 
-def bestMove(ID, board, X_IN_A_LINE):
-    """ Calculates the best move by going over the reward list """
+def bestMoveAndReward(ID, board, X_IN_A_LINE):
     BOARD_SIZE = board.shape[0]
     rewards = np.zeros((BOARD_SIZE, BOARD_SIZE))
     bestReward = 0
@@ -232,7 +226,7 @@ def bestMove(ID, board, X_IN_A_LINE):
                     bestReward = rewards[moveLoc]
                     bestRewardPoint = moveLoc
 
-    return bestRewardPoint
+    return bestReward, bestRewardPoint
 
 
 def generateMoves(board):
@@ -242,8 +236,9 @@ def generateMoves(board):
         for c in range(BOARD_SIZE):
             move = (r, c)
             if legalMove(board, move):
-                moves.append(move)
+                moves.add(move)
     return moves
+
 
 
 # Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
@@ -301,51 +296,72 @@ def lineScore(lineLength, X_IN_A_LINE):
     return 2 ** lineLength
 
 
-def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
-    # Takes the best action that the AI found if depth is equal to 0 or the game is over
+
+def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
+    # Takes the best action that the AI found
+    # - Checks if depth is equal to 0 or the game is over
     if depth == 0 or winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-        y = evaluateBoard(ID * -1, board, X_IN_A_LINE)
-        if y == 0:
-            y = 1
-        return evaluateBoard(ID, board, X_IN_A_LINE) / y, bestMove(ID, board, X_IN_A_LINE)
+        reward, move = bestMoveAndReward(ID, board, X_IN_A_LINE)
+        if (maxPlayer):
+            return reward, move
+        else:
+            return (reward * -1), move
+
+    BOARD_SIZE = board.shape[0]
 
     if maxPlayer:
-        maxEval = -MAX
+        maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
-        for x in moves:
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                moveLoc = (x, y)
+
+                if legalMove(board, moveLoc):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
+                    copyBoard = copy.deepcopy(board)
+                    copyBoard[moveLoc] = ID
+
+                    evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, False)
+                    evaluation = value + evaluation
+                    if evaluation > maxEval:
+                        maxEval = evaluation
+                        maxEvalPoint = moveLoc
+                        alpha = max(alpha, maxEval)
+                if beta <= alpha:
+                    break
             if beta <= alpha:
                 break
-            moves.remove(x)
-            copyBoard = copy.deepcopy(board)
-            copyBoard[x] = ID
-            eval, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, moves, depth - 1, alpha, beta, False)
-            if eval > maxEval:
-                maxEval = eval
-                maxEvalPoint = x
-                alpha = max(alpha, maxEval)
-            moves.append(x)
+
         return maxEval, maxEvalPoint
 
     else:
-        minEval = MAX
+        minEval = MAX * 7
         minEvalPoint = 0, 0
-        for x in moves:
+        for x in range(BOARD_SIZE):
+            for y in range(BOARD_SIZE):
+                moveLoc = (x, y)
+
+                if legalMove(board, moveLoc):
+                    value = rewardAtPoint(ID, board, X_IN_A_LINE, moveLoc)
+                    copyBoard = copy.deepcopy(board)
+                    copyBoard[moveLoc] = ID
+
+                    evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta, True)
+                    evaluation = (value * -1) + evaluation
+                    if evaluation < minEval:
+                        minEval = evaluation
+                        minEvalPoint = moveLoc
+                        beta = min(beta, minEval)
+                if beta <= alpha:
+                    break
             if beta <= alpha:
                 break
-            moves.remove(x)
-            copyBoard = copy.deepcopy(board)
-            copyBoard[x] = ID
-            eval, move = minimax(ID * -1, copyBoard, X_IN_A_LINE, moves, depth - 1, alpha, beta, True)
-            if eval < minEval:
-                minEval = eval
-                minEvalPoint = x
-                beta = min(beta, minEval)
-            moves.append(x)
+
         return minEval, minEvalPoint
 
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, generateMoves(board), 1, -MAX, MAX, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
         print(move)
         return move

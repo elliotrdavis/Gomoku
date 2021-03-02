@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Gomoku.iml" filepath="$PROJECT_DIR$/.idea/Gomoku.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/gomoku.iml" filepath="$PROJECT_DIR$/.idea/gomoku.iml" />
     </modules>
   </component>
 </project>
