@@ -202,12 +202,10 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
                 minMove = x
         return v, minMove
 
-    return max(generateMoves(board), key=lambda x: minValue(ID, board, X_IN_A_LINE))
+    return maxValue(ID, board, X_IN_A_LINE)
 
 
 class Player(GomokuAgent):
     def move(self, board):
         score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE)
-        print(score)
-        print(move)
         return move
