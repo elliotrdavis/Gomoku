@@ -112,7 +112,7 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
     copyBoard[point] = ID
     rewardIncremental = maxDistance * 2
 
-    for x in range(0, X_IN_A_LINE + 1):
+    for x in range(2, X_IN_A_LINE + 1):
         # - If the player can get 2 in a row with 2 empty spaces
         copyBoard[point] = ID * - 1
 
@@ -169,26 +169,29 @@ def getBestMove(board, ID, X_IN_A_LINE):
     return maxReward, maxRewardPoint
 
 
-def minimaxDecision(ID, board, X_IN_A_LINE):
+def minimaxDecision(ID, board, X_IN_A_LINE, alpha, beta):
     'calculate the best move by searching forward all the way to the terminal state'
 
-    def maxValue(ID, board, X_IN_A_LINE):
+    def maxValue(ID, board, X_IN_A_LINE, alpha, beta):
         if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-            return getBestMove(board, ID, X_IN_A_LINE)
+            return 0, (0, 0)
 
         v = -np.inf
         maxMove = 0, 0
         for x in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
-            score, move = minValue(ID, copyBoard, X_IN_A_LINE)
+            score, move = minValue(ID, copyBoard, X_IN_A_LINE, alpha, beta)
             score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
             if score + score2 > v:
                 v = max(v, score + score2)
                 maxMove = x
+            if v >= beta:
+                return v, maxMove
+            alpha = max(alpha, v)
         return v, maxMove
 
-    def minValue(ID, board, X_IN_A_LINE):
+    def minValue(ID, board, X_IN_A_LINE, alpha, beta):
         if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
             return getBestMove(board, ID, X_IN_A_LINE)
 
@@ -197,17 +200,20 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
         for x in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
-            score, move = maxValue(ID, copyBoard, X_IN_A_LINE)
+            score, move = maxValue(ID, copyBoard, X_IN_A_LINE, alpha, beta)
             score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
             if score - score2 < v:
                 v = min(v, score - score2)
                 minMove = x
+            if v <= alpha:
+                return v, minMove
+            beta = min(v, beta)
         return v, minMove
 
-    return maxValue(ID, board, X_IN_A_LINE)
+    return maxValue(ID, board, X_IN_A_LINE, alpha, beta)
 
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE)
+        score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, -np.inf, np.inf)
         return move
