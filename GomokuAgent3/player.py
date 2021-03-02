@@ -3,7 +3,7 @@ import copy
 
 from misc import legalMove, diagTest, rowTest, winningTest
 from gomokuAgent import GomokuAgent
-import gomokuAgent
+from gomokuAgent import GomokuAgent
 
 
 #   @return:
@@ -137,7 +137,7 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
         if rowTest(ID, copyBoard, x) and \
                 endTestRow(ID, copyBoard, x) > 1:
             reward = reward + rewardIncremental
-
+        rewardIncremental = 2 * (rewardIncremental ** 2)
         rewardIncremental = 2 * (rewardIncremental ** 2)
 
     return reward
@@ -225,20 +225,28 @@ def lineScore(lineLength, X_IN_A_LINE):
     return 2 ** lineLength
 
 
-def minmax_decision(board):
-    return 0, 0
+def minimaxDecision(ID, board, X_IN_A_LINE):
+    'calculate the best move by searching forward all the way to the terminal state'
 
+    def maxValue(ID, board, X_IN_A_LINE):
+        if winningTest(ID, board, X_IN_A_LINE):
+            return getBestMove(ID, board, X_IN_A_LINE)
 
-def minimaxDecision(state):
-    return state
+        v = -np.inf
+        for x in generateMoves(board):
+            v = max(v, minValue(rewardAtPoint(ID, board, X_IN_A_LINE, x)))
+        return v
 
+    def minValue(state):
+        if winningTest(ID, board, X_IN_A_LINE):
+            return getBestMove(ID, board, X_IN_A_LINE)
 
-def maxValue(state):
-    return v
+        v = -np.inf
+        for x in generateMoves(board):
+            v = min(v, maxValue(rewardAtPoint(ID, board, X_IN_A_LINE, x)))
+        return v
 
-
-def minValue(state):
-    return v
+    return max(generateMoves(board), key=lambda x: minValue(rewardAtPoint(ID, board, X_IN_A_LINE, x)))
 
 
 class Player(GomokuAgent):
