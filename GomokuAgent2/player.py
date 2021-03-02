@@ -236,9 +236,8 @@ def generateMoves(board):
         for c in range(BOARD_SIZE):
             move = (r, c)
             if legalMove(board, move):
-                moves.add(move)
+                moves.append(move)
     return moves
-
 
 
 # Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
@@ -296,8 +295,111 @@ def lineScore(lineLength, X_IN_A_LINE):
     return 2 ** lineLength
 
 
+def findWinningMove(moves, ID, board, X_IN_A_LINE):
+    for move in moves:
+        if winningTest(ID, board, X_IN_A_LINE):
+            return move
 
-def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
+    return None
+
+
+def calculateMove(ID, board, X_IN_A_LINE, depth):
+    moves = generateMoves(board)
+
+    # return winning move if can win instantly
+    winningMove = findWinningMove(moves, ID, board, X_IN_A_LINE)
+    if winningMove is not None:
+        return winningMove
+
+    bestScore, bestMoveX, bestMoveY = minimax(moves, ID, board, X_IN_A_LINE, depth, alpha=-1, beta=lineScore(X_IN_A_LINE, X_IN_A_LINE))
+    if bestMoveX is None or bestMoveY is None:
+        move = None
+    else:
+        move = (bestMoveX, bestMoveY)
+
+    return move
+
+
+
+
+
+'''
+@return - int score, int bestMoveX, int bestMoveY
+'''
+
+
+def minimax(moves, ID, board, X_IN_A_LINE, depth, alpha, beta):
+    if depth == 0:
+        return evaluateBoard(-ID, board, X_IN_A_LINE), None, None
+
+    #moves = generateMoves(board)
+
+    if len(moves) == 0:
+        return evaluateBoard(-ID, board, X_IN_A_LINE), None, None
+
+    bestMoveX = None
+    bestMoveY = None
+
+    if ID == 1:
+        bestScore = -1
+        copyMoves = copy.deepcopy(moves)
+        for move in copyMoves:
+            # Create a copy of the board in its current state
+            copyBoard = copy.deepcopy(board)
+
+            # Perform the move (we have already established that this move is a
+            # legal move in generateMoves
+            copyBoard[move] = -ID
+
+            #copyMoves.remove(move)
+
+            # Call minimax for next depth
+            tempScore, tempMoveX, tempMoveY = minimax(copyMoves, -ID, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta)
+            if tempMoveX is None:
+                tempMoveX = move[0]
+                tempMoveY = move[1]
+
+            if tempScore > alpha:
+                alpha = tempScore
+
+            if tempScore >= beta:
+                return tempScore, tempMoveX, tempMoveY
+
+            if tempScore > bestScore:
+                bestScore = tempScore
+                bestMoveX = tempMoveX
+                bestMoveY = tempMoveY
+
+    else:
+        bestScore = lineScore(X_IN_A_LINE, X_IN_A_LINE)
+        bestMoveX = moves[0][0]
+        bestMoveY = moves[0][1]
+
+        copyMoves = copy.deepcopy(moves)
+        for move in moves:
+            copyBoard = copy.deepcopy(board)
+
+            copyBoard[move] = ID
+
+            #copyMoves.remove(move)
+
+            tempScore, tempMoveX, tempMoveY = minimax(copyMoves, ID, copyBoard, X_IN_A_LINE, depth - 1, alpha, beta)
+
+            if tempScore < beta:
+                beta = tempScore
+
+            if tempScore <= alpha:
+                return tempScore, tempMoveX, tempMoveY
+
+            if tempScore < bestScore:
+                bestScore = tempScore
+                bestMoveX = tempMoveX
+                bestMoveY = tempMoveY
+
+    return bestScore, bestMoveX, bestMoveY
+
+
+def minimax2(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
     # Takes the best action that the AI found
     # - Checks if depth is equal to 0 or the game is over
     if depth == 0 or winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
@@ -362,6 +464,6 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
-        print(move)
+        #score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
+        move = calculateMove(self.ID, board, X_IN_A_LINE=self.X_IN_A_LINE, depth=2)
         return move
