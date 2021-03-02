@@ -169,11 +169,14 @@ def getBestMove(board, ID, X_IN_A_LINE):
     return maxReward, maxRewardPoint
 
 
-def minimaxDecision(ID, board, X_IN_A_LINE):
+def minimaxDecision(ID, board, X_IN_A_LINE, depth):
     'calculate the best move by searching forward all the way to the terminal state'
 
-    def maxValue(ID, board, X_IN_A_LINE):
+    def maxValue(ID, board, X_IN_A_LINE, depth):
         if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
+            return 0, (0, 0)
+
+        if depth == 0:
             return getBestMove(board, ID, X_IN_A_LINE)
 
         v = -np.inf
@@ -181,15 +184,18 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
         for x in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
-            score, move = minValue(ID, copyBoard, X_IN_A_LINE)
+            score, move = minValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
             score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
             if score + score2 > v:
                 v = max(v, score + score2)
                 maxMove = x
         return v, maxMove
 
-    def minValue(ID, board, X_IN_A_LINE):
+    def minValue(ID, board, X_IN_A_LINE, depth):
         if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
+            return getBestMove(board, ID, X_IN_A_LINE)
+
+        if depth == 0:
             return getBestMove(board, ID, X_IN_A_LINE)
 
         v = np.inf
@@ -197,17 +203,17 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
         for x in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
-            score, move = maxValue(ID, copyBoard, X_IN_A_LINE)
+            score, move = maxValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
             score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
             if score - score2 < v:
                 v = min(v, score - score2)
                 minMove = x
         return v, minMove
 
-    return maxValue(ID, board, X_IN_A_LINE)
+    return maxValue(ID, board, X_IN_A_LINE, depth)
 
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE)
+        score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 0)
         return move
