@@ -210,7 +210,17 @@ def minimaxDecision(ID, board, X_IN_A_LINE, alpha, beta):
             beta = min(v, beta)
         return v, minMove
 
-    return maxValue(ID, board, X_IN_A_LINE, alpha, beta)
+    best_score = -np.inf
+    beta = np.inf
+    best_action = None
+    for x in generateMoves(board):
+        v = minValue(rewardAtPoint(ID, board, X_IN_A_LINE, x), best_score, beta)
+        if v > best_score:
+            best_score = v
+            best_action = alpha
+    return best_action
+
+    #return maxValue(ID, board, X_IN_A_LINE, alpha, beta)
 
 
 class Player(GomokuAgent):
