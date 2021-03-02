@@ -117,11 +117,11 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
         copyBoard[point] = ID * - 1
 
         if diagTest(ID * - 1, copyBoard, x) and \
-                endTestDiag(ID, copyBoard, x) > 1:
+                endTestDiag(ID * - 1, copyBoard, x) > 1:
             reward = reward + rewardIncremental
 
         if rowTest(ID * - 1, copyBoard, x) and \
-                endTestRow(ID, copyBoard, x) > 1:
+                endTestRow(ID * - 1, copyBoard, x) > 1:
             reward = reward + rewardIncremental
 
         rewardIncremental = 2 * (rewardIncremental ** 2)
