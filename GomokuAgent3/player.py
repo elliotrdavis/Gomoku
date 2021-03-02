@@ -2,6 +2,7 @@ import numpy as np
 import copy
 
 from misc import legalMove, diagTest, rowTest, winningTest
+from gomokuAgent import GomokuAgent
 import gomokuAgent
 
 
@@ -137,6 +138,8 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
                 endTestRow(ID, copyBoard, x) > 1:
             reward = reward + rewardIncremental
 
+        rewardIncremental = 2 * (rewardIncremental ** 2)
+
     return reward
 
 
@@ -147,8 +150,79 @@ def generateMoves(board):
         for c in range(BOARD_SIZE):
             move = (r, c)
             if legalMove(board, move):
-                moves.add(move)
+                moves.append(move)
     return moves
+
+
+def getBestMove(board, ID, X_IN_A_LINE):
+    maxReward = 0
+    maxRewardPoint = 0, 0
+
+    BOARD_SIZE = board.shape[0]
+
+    for x in range(BOARD_SIZE):
+        for y in range(BOARD_SIZE):
+            if legalMove(board, (x, y)):
+                score = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
+                if score > maxReward:
+                    maxReward = score
+                    maxRewardPoint = x, y
+    return maxRewardPoint
+
+
+# Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
+# and lines a player has on the board.
+def evaluateBoard(playerID, board, X_IN_A_LINE):
+    score = 0
+    copyBoard = copy.deepcopy(board)
+    score += scoreRows(playerID, copyBoard, X_IN_A_LINE) + scoreDiags(playerID, copyBoard, X_IN_A_LINE)
+
+    rotatedBoard = np.rot90(copyBoard)
+    score += scoreRows(playerID, rotatedBoard, X_IN_A_LINE) + scoreDiags(playerID, rotatedBoard, X_IN_A_LINE)
+
+    return score
+
+
+def scoreRows(playerID, board, X_IN_A_LINE):
+    boardScore = 0
+    BOARD_SIZE = board.shape[0]
+    for r in range(BOARD_SIZE - X_IN_A_LINE + 1):
+        for c in range(BOARD_SIZE - X_IN_A_LINE + 1):
+            rowLength = 0
+            blocked = False
+            for i in range(X_IN_A_LINE):
+                if board[r + i, c] == playerID:
+                    rowLength += 1
+                elif board[r + i, c] == -playerID:
+                    blocked = True
+                    break
+            if not blocked:
+                boardScore += lineScore(rowLength, X_IN_A_LINE)
+    return boardScore
+
+
+def scoreDiags(playerID, board, X_IN_A_LINE):
+    boardScore = 0
+    BOARD_SIZE = board.shape[0]
+    for r in range(BOARD_SIZE - X_IN_A_LINE + 1):
+        for c in range(BOARD_SIZE - X_IN_A_LINE + 1):
+            rowLength = 0
+            blocked = False
+            for i in range(X_IN_A_LINE):
+                if board[r + i, c + i] == playerID:
+                    rowLength += 1
+                elif board[r + i, c + i] == -playerID:
+                    blocked = True
+                    break
+            if not blocked:
+                boardScore += lineScore(rowLength, X_IN_A_LINE)
+    return boardScore
+
+
+def lineScore(lineLength, X_IN_A_LINE):
+    if lineLength == X_IN_A_LINE:
+        return 2 ** (lineLength ** 2)
+    return 2 ** lineLength
 
 
 def minmax_decision(board):
@@ -166,7 +240,7 @@ def maxValue(state):
 def minValue(state):
     return v
 
+
 class Player(GomokuAgent):
     def move(self, board):
-        return 0, 0
-
+        return getBestMove(board, self.ID, self.X_IN_A_LINE)
