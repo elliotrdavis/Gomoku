@@ -2,6 +2,7 @@ import numpy as np
 import copy
 
 from misc import legalMove, diagTest, rowTest, winningTest
+from gomokuAgent import GomokuAgent
 import gomokuAgent
 
 
@@ -147,8 +148,24 @@ def generateMoves(board):
         for c in range(BOARD_SIZE):
             move = (r, c)
             if legalMove(board, move):
-                moves.add(move)
+                moves.append(move)
     return moves
+
+
+def getBestMove(board, ID, X_IN_A_LINE):
+    maxReward = 0
+    maxRewardPoint = 0, 0
+
+    BOARD_SIZE = board.shape[0]
+
+    for x in range(BOARD_SIZE):
+        for y in range(BOARD_SIZE):
+            if legalMove(board, (x, y)):
+                score = rewardAtPoint(ID, board, X_IN_A_LINE, (x, y))
+                if score > maxReward:
+                    maxReward = score
+                    maxRewardPoint = x, y
+    return maxRewardPoint
 
 
 def minmax_decision(board):
@@ -166,7 +183,7 @@ def maxValue(state):
 def minValue(state):
     return v
 
+
 class Player(GomokuAgent):
     def move(self, board):
-        return 0, 0
-
+        return getBestMove(board, self.ID, self.X_IN_A_LINE)
