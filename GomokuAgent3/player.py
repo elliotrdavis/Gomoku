@@ -182,8 +182,9 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
             score, move = minValue(ID, copyBoard, X_IN_A_LINE)
-            if score > v:
-                v = max(v, score)
+            score2, move2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+            if score + score2 > v:
+                v = max(v, score + score2)
                 maxMove = x
         return v, maxMove
 
@@ -197,8 +198,9 @@ def minimaxDecision(ID, board, X_IN_A_LINE):
             copyBoard = copy.deepcopy(board)
             copyBoard[x] = ID
             score, move = maxValue(ID, copyBoard, X_IN_A_LINE)
-            if score < v:
-                v = min(v, score)
+            score2, move2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+            if score - score2 < v:
+                v = min(v, score - score2)
                 minMove = x
         return v, minMove
 
