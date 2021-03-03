@@ -244,20 +244,15 @@ def generateMoves(board):
     return moves
 
 
-# - Calculates the mean reward of the board
-def mean(moves, ID, board, X_IN_A_LINE):
-    totalValue = 0
+# - Sorts values and returns 10th highest value so we are not checking low scoring points in minimax
+def topMoves(moves):
     array = []
     for x in moves:
-        value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-        totalValue = totalValue + value
         array.append(value)
-    BOARD_SIZE = board.shape[0]
-    mean = totalValue / (BOARD_SIZE*BOARD_SIZE)
 
     array.sort(reverse=True)
     top = array[10]
-    #print(array)
+
     return top
 
 
@@ -275,10 +270,10 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
         maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
 
-        maxMean = mean(moves, ID, board, X_IN_A_LINE)
+        maxTop = topMoves(moves)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            if maxMean < value:
+            if maxTop < value:
                 copyBoard = copy.deepcopy(board)
                 copyBoard[x] = ID
 
@@ -297,10 +292,10 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
         minEval = MAX * 7
         minEvalPoint = 0, 0
 
-        minMean = mean(moves, ID, board, X_IN_A_LINE)
+        minTop = topMoves(moves)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            if minMean > value:
+            if minTop > value:
                 copyBoard = copy.deepcopy(board)
                 copyBoard[x] = ID
 
