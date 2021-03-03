@@ -247,12 +247,18 @@ def generateMoves(board):
 # - Calculates the mean reward of the board
 def mean(moves, ID, board, X_IN_A_LINE):
     totalValue = 0
+    array = []
     for x in moves:
         value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
         totalValue = totalValue + value
+        array.append(value)
     BOARD_SIZE = board.shape[0]
     mean = totalValue / (BOARD_SIZE*BOARD_SIZE)
-    return mean
+
+    array.sort(reverse=True)
+    top = array[10]
+    #print(array)
+    return top
 
 
 def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):

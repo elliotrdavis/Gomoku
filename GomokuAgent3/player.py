@@ -333,5 +333,5 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
 class Player(GomokuAgent):
     def move(self, board):
-        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 3, None, None)
+        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 1, None, None)
         return move
