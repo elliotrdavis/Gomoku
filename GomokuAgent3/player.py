@@ -4,6 +4,16 @@ import copy
 from misc import legalMove, diagTest, rowTest, winningTest
 from gomokuAgent import GomokuAgent
 
+MAX = 1000000000000000
+BLOCK_FIVE = 100000000
+FOUR = 100000
+BLOCK_FOUR = 30000
+THREE = 5000
+BLOCK_THREE = 1670
+TWO = 1500
+BLOCK_TWO = 300
+MIN = 0
+
 
 #   @return:
 #   int giving the distance between two points
@@ -44,6 +54,7 @@ def centroid(playerId, board):
         return BOARD_SIZE / 2, BOARD_SIZE / 2
     return (totalX / totalPoints), (totalY / totalPoints)
 
+
 # Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
 # and lines a player has on the board.
 def evaluateBoard(playerID, board, X_IN_A_LINE):
@@ -55,6 +66,7 @@ def evaluateBoard(playerID, board, X_IN_A_LINE):
     score += scoreRows(playerID, rotatedBoard, X_IN_A_LINE) + scoreDiags(playerID, rotatedBoard, X_IN_A_LINE)
 
     return score
+
 
 def scoreRows(playerID, board, X_IN_A_LINE):
     boardScore = 0
@@ -90,6 +102,7 @@ def scoreDiags(playerID, board, X_IN_A_LINE):
             if not blocked:
                 boardScore += lineScore(rowLength, X_IN_A_LINE)
     return boardScore
+
 
 def lineScore(lineLength, X_IN_A_LINE):
     if lineLength == X_IN_A_LINE:
@@ -168,34 +181,88 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
     center = centroid(ID, copyBoard)
     reward = maxDistance - distance(point, center)
     copyBoard[point] = ID
-    rewardIncremental = maxDistance * 2
 
-    for x in range(0, X_IN_A_LINE + 1):
-        # - If the player can get 2 in a row with 2 empty spaces
-        copyBoard[point] = ID * - 1
+    # - If the player has a winning move play that winning move
+    if winningTest(ID, copyBoard, X_IN_A_LINE):
+        return MAX
 
-        if diagTest(ID * - 1, copyBoard, x) and \
-                endTestDiag(ID * - 1, copyBoard, x) > 1:
-            reward = reward + rewardIncremental
+    ''' - If the other player has a winning move block that move, we do x in a line -2 first to
+    check if they have a checkmate type move (Imagine that a player needs to get 5 in a row if
+    they have 3 in a row with both sides open they can place on one either side to get the win)'''
+    copyBoard[point] = ID * -1
 
-        if rowTest(ID * - 1, copyBoard, x) and \
-                endTestRow(ID * - 1, copyBoard, x) > 1:
-            reward = reward + rewardIncremental
+    # - If the enemy has a winning move prioritise blocking that winning move
+    if winningTest(ID * -1, copyBoard, X_IN_A_LINE):
+        return BLOCK_FIVE
 
-        rewardIncremental = 2 * (rewardIncremental ** 2)
-        ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
-            are two empty spaces '''
-        copyBoard[point] = ID
+    # - If the player can get 4 in a row with 2 empty spaces
+    copyBoard[point] = ID
 
-        if diagTest(ID, copyBoard, x) and \
-                endTestDiag(ID, copyBoard, x) > 1:
-            reward = reward + rewardIncremental
+    if diagTest(ID, copyBoard, X_IN_A_LINE - 1) and \
+            endTestDiag(ID, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + FOUR
 
-        if rowTest(ID, copyBoard, x) and \
-                endTestRow(ID, copyBoard, x) > 1:
-            reward = reward + rewardIncremental
+    if rowTest(ID, copyBoard, X_IN_A_LINE - 1) and \
+            endTestRow(ID, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + FOUR
 
-        rewardIncremental = 2 * (rewardIncremental ** 2)
+    ''' If the enemy can get 3 in a row/diagonal angle we want to block them from getting 4 if there
+    are two empty spaces '''
+    copyBoard[point] = ID * -1
+
+    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
+            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + BLOCK_FOUR
+
+    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 1) and \
+            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 1) > 1:
+        reward = reward + BLOCK_FOUR
+
+    # - If the player can get 3 in a row with 2 empty spaces
+    copyBoard[point] = ID
+
+    if diagTest(ID, copyBoard, X_IN_A_LINE - 2) and \
+            endTestDiag(ID, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + THREE
+
+    if rowTest(ID, copyBoard, X_IN_A_LINE - 2) and \
+            endTestRow(ID, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + THREE
+
+    ''' If the enemy can get 2 in a row/diagonal angle we want to block them from getting 3 if there
+        are two empty spaces '''
+    copyBoard[point] = ID * -1
+
+    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
+            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + BLOCK_FOUR
+
+    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 2) and \
+            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 2) > 1:
+        reward = reward + BLOCK_THREE
+
+    # - If the player can get 2 in a row with 2 empty spaces
+    copyBoard[point] = ID
+
+    if diagTest(ID, copyBoard, X_IN_A_LINE - 3) and \
+            endTestDiag(ID, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + TWO
+
+    if rowTest(ID, copyBoard, X_IN_A_LINE - 3) and \
+            endTestRow(ID, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + TWO
+
+    ''' If the enemy can get 1 in a row/diagonal angle we want to block them from getting 2 if there
+        are two empty spaces '''
+    copyBoard[point] = ID * -1
+
+    if diagTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
+            endTestDiag(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + BLOCK_TWO
+
+    if rowTest(ID * -1, copyBoard, X_IN_A_LINE - 3) and \
+            endTestRow(ID * -1, copyBoard, X_IN_A_LINE - 3) > 1:
+        reward = reward + BLOCK_TWO
 
     return reward
 
@@ -227,7 +294,7 @@ def getBestMove(board, ID, X_IN_A_LINE):
     return maxReward, maxRewardPoint
 
 
-def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
+def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
 
@@ -235,29 +302,29 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     #state = board
     # Functions used by alpha_beta
 
-
-    def max_value(board, alpha, beta, depth):
+    def max_value(ID, board, alpha, beta, depth):
         if cutoff_test(board, depth):
-            return eval_fn(board)
+            return getBestMove(board, ID, X_IN_A_LINE)
         v = -np.inf
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[a] = ID
-            v = max(v, min_value(copyBoard, alpha, beta, depth + 1))
+            value = rewardAtPoint(ID, board, X_IN_A_LINE, a)
+            v = max(v, value + min_value(ID * -1, copyBoard, alpha, beta, depth + 1))
             if v >= beta:
                 return v
             alpha = max(alpha, v)
         return v
 
-    def min_value(board, alpha, beta, depth):
+    def min_value(ID, board, alpha, beta, depth):
         if cutoff_test(board, depth):
-            return eval_fn(board)
+            return evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)
         v = np.inf
         #print(board)
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
-            copyBoard[a] = ID * -1
-            v = min(v, max_value(copyBoard, alpha, beta, depth + 1))
+            copyBoard[a] = ID
+            v = min(v, max_value(ID * -1, copyBoard, alpha, beta, depth + 1))
             if v <= alpha:
                 return v
             beta = min(beta, v)
@@ -275,63 +342,20 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     # The default test cuts off at depth d or at a terminal state
     #print(board)
     cutoff_test = (cutoff_test or (lambda board, depth: depth > d or terminal_test(ID, board, X_IN_A_LINE)))
-    eval_fn = eval_fn or (lambda board: evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)) # Returns the value of this final state to the player
-    #evaluateBoard(playerID, board, X_IN_A_LINE)
     best_score = -np.inf
     beta = np.inf
-    best_action = None
+    best_action = generateMoves(board)[0]
     for a in generateMoves(board):
         copyBoard = copy.deepcopy(board)
         copyBoard[a] = ID
-        v = min_value(copyBoard, best_score, beta, 1)
+        v = min_value(ID * -1, copyBoard, best_score, beta, 1)
         if v > best_score:
             best_score = v
             best_action = a
     return best_action
 
-    #
-    # def maxValue(ID, board, X_IN_A_LINE, depth):
-    #     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-    #         return 0, (0, 0)
-    #
-    #     if depth == 0:
-    #         return getBestMove(board, ID, X_IN_A_LINE)
-    #
-    #     v = -np.inf
-    #     maxMove = 0, 0
-    #     for x in generateMoves(board):
-    #         copyBoard = copy.deepcopy(board)
-    #         copyBoard[x] = ID
-    #         score, move = minValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
-    #         score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-    #         if score + score2 > v:
-    #             v = max(v, score + score2)
-    #             maxMove = x
-    #     return v, maxMove
-    #
-    # def minValue(ID, board, X_IN_A_LINE, depth):
-    #     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-    #         return getBestMove(board, ID, X_IN_A_LINE)
-    #
-    #     if depth == 0:
-    #         return getBestMove(board, ID, X_IN_A_LINE)
-    #
-    #     v = np.inf
-    #     minMove = 0, 0
-    #     for x in generateMoves(board):
-    #         copyBoard = copy.deepcopy(board)
-    #         copyBoard[x] = ID
-    #         score, move = maxValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
-    #         score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-    #         if score - score2 < v:
-    #             v = min(v, score - score2)
-    #             minMove = x
-    #     return v, minMove
-    #
-    # return maxValue(ID, board, X_IN_A_LINE, depth)
-
 
 class Player(GomokuAgent):
     def move(self, board):
-        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 3, None, None)
+        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 0, None)
         return move
