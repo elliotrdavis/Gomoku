@@ -216,13 +216,15 @@ def getBestMove(board, ID, X_IN_A_LINE):
     return maxReward, maxRewardPoint
 
 
-def minimaxDecision(ID, board, X_IN_A_LINE, d=4, cutoff_test=None, eval_fn=None):
+def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
 
     #player = game.to_move(state) - ID
     #state = board
     # Functions used by alpha_beta
+
+
     def max_value(board, alpha, beta, depth):
         if cutoff_test(board, depth):
             return eval_fn(board)
@@ -317,5 +319,5 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d=4, cutoff_test=None, eval_fn=None)
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 0)
+        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 4, None, None)
         return move
