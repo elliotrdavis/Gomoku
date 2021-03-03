@@ -361,6 +361,6 @@ def minimax(ID, board, X_IN_A_LINE, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
-        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 2, -MAX, MAX, True)
+        score, move = minimax(self.ID, board, self.X_IN_A_LINE, 0, -MAX, MAX, True)
         print(move)
         return move

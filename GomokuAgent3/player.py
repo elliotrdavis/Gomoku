@@ -44,6 +44,53 @@ def centroid(playerId, board):
         return BOARD_SIZE / 2, BOARD_SIZE / 2
     return (totalX / totalPoints), (totalY / totalPoints)
 
+# Assigns a board a score with respect to a player, given by playerID. Score is dependent on the rows
+# and lines a player has on the board.
+def evaluateBoard(playerID, board, X_IN_A_LINE):
+    score = 0
+    copyBoard = copy.deepcopy(board)
+    score += scoreRows(playerID, copyBoard, X_IN_A_LINE) + scoreDiags(playerID, copyBoard, X_IN_A_LINE)
+
+    rotatedBoard = np.rot90(copyBoard)
+    score += scoreRows(playerID, rotatedBoard, X_IN_A_LINE) + scoreDiags(playerID, rotatedBoard, X_IN_A_LINE)
+
+    return score
+
+def scoreRows(playerID, board, X_IN_A_LINE):
+    boardScore = 0
+    BOARD_SIZE = board.shape[0]
+    for r in range(BOARD_SIZE - X_IN_A_LINE + 1):
+        for c in range(BOARD_SIZE - 1):
+            rowLength = 0
+            blocked = False
+            for i in range(X_IN_A_LINE):
+                if board[r + i, c] == playerID:
+                    rowLength += 1
+                elif board[r + i, c] == -playerID:
+                    blocked = True
+                    break
+            if not blocked:
+                boardScore += lineScore(rowLength, X_IN_A_LINE)
+    return boardScore
+
+
+def scoreDiags(playerID, board, X_IN_A_LINE):
+    boardScore = 0
+    BOARD_SIZE = board.shape[0]
+    for r in range(BOARD_SIZE - X_IN_A_LINE + 1):
+        for c in range(BOARD_SIZE - X_IN_A_LINE + 1):
+            rowLength = 0
+            blocked = False
+            for i in range(X_IN_A_LINE):
+                if board[r + i, c + i] == playerID:
+                    rowLength += 1
+                elif board[r + i, c + i] == -playerID:
+                    blocked = True
+                    break
+            if not blocked:
+                boardScore += lineScore(rowLength, X_IN_A_LINE)
+    return boardScore
+
 
 #   @return:
 #   int giving number of empty spaces at ends of line for diagonals
@@ -169,48 +216,103 @@ def getBestMove(board, ID, X_IN_A_LINE):
     return maxReward, maxRewardPoint
 
 
-def minimaxDecision(ID, board, X_IN_A_LINE, depth):
-    'calculate the best move by searching forward all the way to the terminal state'
+def minimaxDecision(ID, board, X_IN_A_LINE, d=4, cutoff_test=None, eval_fn=None):
+    """Search game to determine best action; use alpha-beta pruning.
+    This version cuts off search and uses an evaluation function."""
 
-    def maxValue(ID, board, X_IN_A_LINE, depth):
-        if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-            return 0, (0, 0)
-
-        if depth == 0:
-            return getBestMove(board, ID, X_IN_A_LINE)
-
+    #player = game.to_move(state) - ID
+    #state = board
+    # Functions used by alpha_beta
+    def max_value(board, alpha, beta, depth):
+        if cutoff_test(board, depth):
+            return eval_fn(board)
         v = -np.inf
-        maxMove = 0, 0
-        for x in generateMoves(board):
+        for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
-            copyBoard[x] = ID
-            score, move = minValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
-            score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            if score + score2 > v:
-                v = max(v, score + score2)
-                maxMove = x
-        return v, maxMove
+            copyBoard[a] = ID
+            v = max(v, min_value(copyBoard[a], alpha, beta, depth + 1))
+            if v >= beta:
+                return v
+            alpha = max(alpha, v)
+        return v
 
-    def minValue(ID, board, X_IN_A_LINE, depth):
-        if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-            return getBestMove(board, ID, X_IN_A_LINE)
-
-        if depth == 0:
-            return getBestMove(board, ID, X_IN_A_LINE)
-
+    def min_value(board, alpha, beta, depth):
+        if cutoff_test(board, depth):
+            return eval_fn(board)
         v = np.inf
-        minMove = 0, 0
-        for x in generateMoves(board):
+        for a in game.actions(state):
             copyBoard = copy.deepcopy(board)
-            copyBoard[x] = ID
-            score, move = maxValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
-            score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            if score - score2 < v:
-                v = min(v, score - score2)
-                minMove = x
-        return v, minMove
+            copyBoard[a] = ID
+            v = min(v, max_value(copyBoard[a], alpha, beta, depth + 1))
+            if v <= alpha:
+                return v
+            beta = min(beta, v)
+        return v
 
-    return maxValue(ID, board, X_IN_A_LINE, depth)
+    def terminal_test(ID, board, X_IN_A_LINE):
+        if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
+            return True
+        else:
+            return False
+
+
+    # Body of alpha_beta_cutoff_search starts here:
+    # The default test cuts off at depth d or at a terminal state
+    cutoff_test = (cutoff_test or (lambda board, depth: depth > d or terminal_test(ID, board, X_IN_A_LINE)))
+    eval_fn = eval_fn or (lambda state: evaluateBoard(ID, board, X_IN_A_LINE)) # Returns the value of this final state to the player
+    #evaluateBoard(playerID, board, X_IN_A_LINE)
+    best_score = -np.inf
+    beta = np.inf
+    best_action = None
+    for a in generateMoves(board):
+        copyBoard = copy.deepcopy(board)
+        copyBoard[a] = ID
+        v = min_value(copyBoard[a], best_score, beta, 1)
+        if v > best_score:
+            best_score = v
+            best_action = a
+    return best_action
+
+    #
+    # def maxValue(ID, board, X_IN_A_LINE, depth):
+    #     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
+    #         return 0, (0, 0)
+    #
+    #     if depth == 0:
+    #         return getBestMove(board, ID, X_IN_A_LINE)
+    #
+    #     v = -np.inf
+    #     maxMove = 0, 0
+    #     for x in generateMoves(board):
+    #         copyBoard = copy.deepcopy(board)
+    #         copyBoard[x] = ID
+    #         score, move = minValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
+    #         score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+    #         if score + score2 > v:
+    #             v = max(v, score + score2)
+    #             maxMove = x
+    #     return v, maxMove
+    #
+    # def minValue(ID, board, X_IN_A_LINE, depth):
+    #     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
+    #         return getBestMove(board, ID, X_IN_A_LINE)
+    #
+    #     if depth == 0:
+    #         return getBestMove(board, ID, X_IN_A_LINE)
+    #
+    #     v = np.inf
+    #     minMove = 0, 0
+    #     for x in generateMoves(board):
+    #         copyBoard = copy.deepcopy(board)
+    #         copyBoard[x] = ID
+    #         score, move = maxValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
+    #         score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+    #         if score - score2 < v:
+    #             v = min(v, score - score2)
+    #             minMove = x
+    #     return v, minMove
+    #
+    # return maxValue(ID, board, X_IN_A_LINE, depth)
 
 
 class Player(GomokuAgent):
