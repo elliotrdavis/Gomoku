@@ -91,6 +91,17 @@ def scoreDiags(playerID, board, X_IN_A_LINE):
                 boardScore += lineScore(rowLength, X_IN_A_LINE)
     return boardScore
 
+def lineScore(lineLength, X_IN_A_LINE):
+    if lineLength == X_IN_A_LINE:
+        return 10 ** 10
+    elif lineLength == X_IN_A_LINE - 1:
+        return 10 ** 4
+    elif lineLength == X_IN_A_LINE - 2:
+        return 10 ** 3
+    elif lineLength == X_IN_A_LINE - 3:
+        return 10 ** 2
+    return 0
+
 
 #   @return:
 #   int giving number of empty spaces at ends of line for diagonals
@@ -232,7 +243,7 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[a] = ID
-            v = max(v, min_value(copyBoard[a], alpha, beta, depth + 1))
+            v = max(v, min_value(copyBoard, alpha, beta, depth + 1))
             if v >= beta:
                 return v
             alpha = max(alpha, v)
@@ -242,16 +253,18 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
         if cutoff_test(board, depth):
             return eval_fn(board)
         v = np.inf
-        for a in game.actions(state):
+        #print(board)
+        for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[a] = ID
-            v = min(v, max_value(copyBoard[a], alpha, beta, depth + 1))
+            v = min(v, max_value(copyBoard, alpha, beta, depth + 1))
             if v <= alpha:
                 return v
             beta = min(beta, v)
         return v
 
     def terminal_test(ID, board, X_IN_A_LINE):
+        #print(board)
         if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
             return True
         else:
@@ -260,8 +273,9 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
     # Body of alpha_beta_cutoff_search starts here:
     # The default test cuts off at depth d or at a terminal state
+    #print(board)
     cutoff_test = (cutoff_test or (lambda board, depth: depth > d or terminal_test(ID, board, X_IN_A_LINE)))
-    eval_fn = eval_fn or (lambda state: evaluateBoard(ID, board, X_IN_A_LINE)) # Returns the value of this final state to the player
+    eval_fn = eval_fn or (lambda board: evaluateBoard(ID, board, X_IN_A_LINE)) # Returns the value of this final state to the player
     #evaluateBoard(playerID, board, X_IN_A_LINE)
     best_score = -np.inf
     beta = np.inf
@@ -269,7 +283,7 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     for a in generateMoves(board):
         copyBoard = copy.deepcopy(board)
         copyBoard[a] = ID
-        v = min_value(copyBoard[a], best_score, beta, 1)
+        v = min_value(copyBoard, best_score, beta, 1)
         if v > best_score:
             best_score = v
             best_action = a
@@ -319,5 +333,5 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
 class Player(GomokuAgent):
     def move(self, board):
-        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 4, None, None)
+        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 1, None, None)
         return move
