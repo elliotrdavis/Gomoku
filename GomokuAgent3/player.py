@@ -238,7 +238,7 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
     def max_value(board, alpha, beta, depth):
         if cutoff_test(board, depth):
-            return eval_fn(board)
+            return evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)
         v = -np.inf
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
@@ -251,12 +251,12 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
     def min_value(board, alpha, beta, depth):
         if cutoff_test(board, depth):
-            return eval_fn(board)
+            return evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)
         v = np.inf
         #print(board)
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
-            copyBoard[a] = ID
+            copyBoard[a] = ID * -1
             v = min(v, max_value(copyBoard, alpha, beta, depth + 1))
             if v <= alpha:
                 return v
@@ -275,7 +275,6 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     # The default test cuts off at depth d or at a terminal state
     #print(board)
     cutoff_test = (cutoff_test or (lambda board, depth: depth > d or terminal_test(ID, board, X_IN_A_LINE)))
-    eval_fn = eval_fn or (lambda board: evaluateBoard(ID, board, X_IN_A_LINE)) # Returns the value of this final state to the player
     #evaluateBoard(playerID, board, X_IN_A_LINE)
     best_score = -np.inf
     beta = np.inf
@@ -333,5 +332,5 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
 class Player(GomokuAgent):
     def move(self, board):
-        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 5, None, None)
+        move = minimaxDecision(self.ID, board, self.X_IN_A_LINE, 3, None, None)
         return move
