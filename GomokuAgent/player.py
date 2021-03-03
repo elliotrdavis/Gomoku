@@ -103,6 +103,7 @@ def endTestRow(playerID, board, X_IN_A_LINE):
     return 0
 
 
+# - Returns the reward at a given point
 def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     copyBoard = copy.deepcopy(board)
     reward1 = rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point)
@@ -115,6 +116,7 @@ def rewardAtPoint(ID, board, X_IN_A_LINE, point):
     return reward1 + reward2
 
 
+# - Helper function used to calculate reward at a point, called twice on board and board prime
 def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
     """ - Sets the base value of the reward to the max distance subtract the distance between the move
         and center """
@@ -208,6 +210,7 @@ def rewardAtPointAux(ID, copyBoard, X_IN_A_LINE, point):
     return reward
 
 
+# - Returns both the best possible reward and a tuple of the move to take for that reward
 def bestMoveAndReward(ID, board, X_IN_A_LINE):
     BOARD_SIZE = board.shape[0]
     rewards = np.zeros((BOARD_SIZE, BOARD_SIZE))
@@ -229,6 +232,7 @@ def bestMoveAndReward(ID, board, X_IN_A_LINE):
     return bestReward, bestRewardPoint
 
 
+# - Generates a list of all legal moves from a game state
 def generateMoves(board):
     moves = []
     BOARD_SIZE = board.shape[0]
@@ -239,6 +243,8 @@ def generateMoves(board):
                 moves.append(move)
     return moves
 
+
+# - Calculates the mean reward of the board
 def mean(moves, ID, board, X_IN_A_LINE):
     totalValue = 0
     for x in moves:
@@ -249,13 +255,13 @@ def mean(moves, ID, board, X_IN_A_LINE):
     return mean
 
 
-
 def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
     # Takes the best action that the AI found
-    # - Checks if depth is equal to 0 or the game is over
+    # - Checks if depth is equal to 0
     if depth == 0:
         return bestMoveAndReward(ID, board, X_IN_A_LINE)
 
+    # - Checks if the game has ended
     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
         return 0, (0, 0)
 
@@ -263,10 +269,10 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
         maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
 
-        maxmean = mean(moves, ID, board, X_IN_A_LINE)
+        maxMean = mean(moves, ID, board, X_IN_A_LINE)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            if maxmean < value:
+            if maxMean < value:
                 copyBoard = copy.deepcopy(board)
                 copyBoard[x] = ID
 
@@ -285,10 +291,10 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
         minEval = MAX * 7
         minEvalPoint = 0, 0
 
-        minmean = mean(moves, ID, board, X_IN_A_LINE)
+        minMean = mean(moves, ID, board, X_IN_A_LINE)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            if minmean < value:
+            if minMean > value:
                 copyBoard = copy.deepcopy(board)
                 copyBoard[x] = ID
 
