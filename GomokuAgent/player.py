@@ -239,6 +239,16 @@ def generateMoves(board):
                 moves.append(move)
     return moves
 
+def mean(moves, ID, board, X_IN_A_LINE):
+    totalValue = 0
+    for x in moves:
+        value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
+        totalValue = totalValue + value
+    BOARD_SIZE = board.shape[0]
+    mean = totalValue / (BOARD_SIZE*BOARD_SIZE)
+    return mean
+
+
 
 def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
     # Takes the best action that the AI found
@@ -252,39 +262,45 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
     if maxPlayer:
         maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
+
+        maxmean = mean(moves, ID, board, X_IN_A_LINE)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            copyBoard = copy.deepcopy(board)
-            copyBoard[x] = ID
+            if maxmean < value:
+                copyBoard = copy.deepcopy(board)
+                copyBoard[x] = ID
 
-            moves.remove(x)
-            evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, moves, depth - 1, alpha, beta, False)
-            evaluation = value + evaluation
-            if evaluation > maxEval:
-                maxEval = evaluation
-                maxEvalPoint = x
-                alpha = max(alpha, maxEval)
-            if beta <= alpha:
-                break
+                moves.remove(x)
+                evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, moves, depth - 1, alpha, beta, False)
+                evaluation = value + evaluation
+                if evaluation > maxEval:
+                    maxEval = evaluation
+                    maxEvalPoint = x
+                    alpha = max(alpha, maxEval)
+                if beta <= alpha:
+                    break
         return maxEval, maxEvalPoint
 
     else:
         minEval = MAX * 7
         minEvalPoint = 0, 0
+
+        minmean = mean(moves, ID, board, X_IN_A_LINE)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-            copyBoard = copy.deepcopy(board)
-            copyBoard[x] = ID
+            if minmean < value:
+                copyBoard = copy.deepcopy(board)
+                copyBoard[x] = ID
 
-            moves.remove(x)
-            evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, moves, depth - 1, alpha, beta, True)
-            evaluation = evaluation - value
-            if evaluation < minEval:
-                minEval = evaluation
-                minEvalPoint = x
-                beta = min(beta, minEval)
-            if beta <= alpha:
-                break
+                moves.remove(x)
+                evaluation, move = minimax(ID * - 1, copyBoard, X_IN_A_LINE, moves, depth - 1, alpha, beta, True)
+                evaluation = evaluation - value
+                if evaluation < minEval:
+                    minEval = evaluation
+                    minEvalPoint = x
+                    beta = min(beta, minEval)
+                if beta <= alpha:
+                    break
         return minEval, minEvalPoint
 
 
