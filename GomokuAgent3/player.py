@@ -238,7 +238,7 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
     def max_value(board, alpha, beta, depth):
         if cutoff_test(board, depth):
-            return evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)
+            return eval_fn(board)
         v = -np.inf
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
@@ -251,7 +251,7 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
     def min_value(board, alpha, beta, depth):
         if cutoff_test(board, depth):
-            return evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)
+            return eval_fn(board)
         v = np.inf
         #print(board)
         for a in generateMoves(board):
@@ -275,6 +275,7 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     # The default test cuts off at depth d or at a terminal state
     #print(board)
     cutoff_test = (cutoff_test or (lambda board, depth: depth > d or terminal_test(ID, board, X_IN_A_LINE)))
+    eval_fn = eval_fn or (lambda board: evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)) # Returns the value of this final state to the player
     #evaluateBoard(playerID, board, X_IN_A_LINE)
     best_score = -np.inf
     beta = np.inf
