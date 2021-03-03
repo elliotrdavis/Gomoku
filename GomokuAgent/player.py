@@ -245,9 +245,10 @@ def generateMoves(board):
 
 
 # - Sorts values and returns 10th highest value so we are not checking low scoring points in minimax
-def topMoves(moves):
+def topMoves(moves, ID, board, X_IN_A_LINE):
     array = []
     for x in moves:
+        value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
         array.append(value)
 
     array.sort(reverse=True)
@@ -270,7 +271,7 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
         maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
 
-        maxTop = topMoves(moves)
+        maxTop = topMoves(moves, ID, board, X_IN_A_LINE)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
             if maxTop < value:
@@ -292,7 +293,7 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
         minEval = MAX * 7
         minEvalPoint = 0, 0
 
-        minTop = topMoves(moves)
+        minTop = topMoves(moves, ID, board, X_IN_A_LINE)
         for x in moves:
             value = rewardAtPoint(ID, board, X_IN_A_LINE, x)
             if minTop > value:
