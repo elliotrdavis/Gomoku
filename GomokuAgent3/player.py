@@ -230,12 +230,6 @@ def getBestMove(board, ID, X_IN_A_LINE):
 def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
     """Search game to determine best action; use alpha-beta pruning.
     This version cuts off search and uses an evaluation function."""
-
-    #player = game.to_move(state) - ID
-    #state = board
-    # Functions used by alpha_beta
-
-
     def max_value(board, alpha, beta, depth):
         if cutoff_test(board, depth):
             return eval_fn(board)
@@ -253,7 +247,6 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
         if cutoff_test(board, depth):
             return eval_fn(board)
         v = np.inf
-        #print(board)
         for a in generateMoves(board):
             copyBoard = copy.deepcopy(board)
             copyBoard[a] = ID * -1
@@ -264,7 +257,6 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
         return v
 
     def terminal_test(ID, board, X_IN_A_LINE):
-        #print(board)
         if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
             return True
         else:
@@ -273,10 +265,8 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
 
     # Body of alpha_beta_cutoff_search starts here:
     # The default test cuts off at depth d or at a terminal state
-    #print(board)
     cutoff_test = (cutoff_test or (lambda board, depth: depth > d or terminal_test(ID, board, X_IN_A_LINE)))
-    eval_fn = eval_fn or (lambda board: evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE)) # Returns the value of this final state to the player
-    #evaluateBoard(playerID, board, X_IN_A_LINE)
+    eval_fn = eval_fn or (lambda board: evaluateBoard(ID, board, X_IN_A_LINE) - evaluateBoard(ID * -1, board, X_IN_A_LINE))
     best_score = -np.inf
     beta = np.inf
     best_action = None
@@ -288,48 +278,6 @@ def minimaxDecision(ID, board, X_IN_A_LINE, d, cutoff_test, eval_fn):
             best_score = v
             best_action = a
     return best_action
-
-    #
-    # def maxValue(ID, board, X_IN_A_LINE, depth):
-    #     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-    #         return 0, (0, 0)
-    #
-    #     if depth == 0:
-    #         return getBestMove(board, ID, X_IN_A_LINE)
-    #
-    #     v = -np.inf
-    #     maxMove = 0, 0
-    #     for x in generateMoves(board):
-    #         copyBoard = copy.deepcopy(board)
-    #         copyBoard[x] = ID
-    #         score, move = minValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
-    #         score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-    #         if score + score2 > v:
-    #             v = max(v, score + score2)
-    #             maxMove = x
-    #     return v, maxMove
-    #
-    # def minValue(ID, board, X_IN_A_LINE, depth):
-    #     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
-    #         return getBestMove(board, ID, X_IN_A_LINE)
-    #
-    #     if depth == 0:
-    #         return getBestMove(board, ID, X_IN_A_LINE)
-    #
-    #     v = np.inf
-    #     minMove = 0, 0
-    #     for x in generateMoves(board):
-    #         copyBoard = copy.deepcopy(board)
-    #         copyBoard[x] = ID
-    #         score, move = maxValue(ID, copyBoard, X_IN_A_LINE, depth - 1)
-    #         score2 = rewardAtPoint(ID, board, X_IN_A_LINE, x)
-    #         if score - score2 < v:
-    #             v = min(v, score - score2)
-    #             minMove = x
-    #     return v, minMove
-    #
-    # return maxValue(ID, board, X_IN_A_LINE, depth)
-
 
 class Player(GomokuAgent):
     def move(self, board):

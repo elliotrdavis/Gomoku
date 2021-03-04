@@ -267,6 +267,7 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
     if winningTest(ID, board, X_IN_A_LINE) or winningTest(ID * -1, board, X_IN_A_LINE):
         return 0, (0, 0)
 
+    # - If max player attempt to maximizes min players move
     if maxPlayer:
         maxEval = -(MAX * 7)
         maxEvalPoint = 0, 0
@@ -289,6 +290,7 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
                     break
         return maxEval, maxEvalPoint
 
+    # - If min player attempts to minimize score
     else:
         minEval = MAX * 7
         minEvalPoint = 0, 0
@@ -314,5 +316,6 @@ def minimax(ID, board, X_IN_A_LINE, moves, depth, alpha, beta, maxPlayer):
 
 class Player(GomokuAgent):
     def move(self, board):
+        # _ We used depth level 1 as any higher depth would cause a time out
         score, move = minimax(self.ID, board, self.X_IN_A_LINE, generateMoves(board), 1, -MAX, MAX, True)
         return move
